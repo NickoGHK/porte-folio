@@ -299,8 +299,12 @@ export default function Escales() {
           </div>
         </div>
 
-        {/* contenu projet */}
-        <div style={{ position: "absolute", left: 120, top: 170, display: "flex", flexDirection: "column", gap: 22, maxWidth: 560 }}>
+        {/* contenu projet + visuel : empilés dans un même flex column pour que
+            la fenêtre "visuel" soit toujours repoussée sous le texte, même
+            quand un titre/description plus long dépasse les minHeight
+            (positions absolues indépendantes = chevauchement possible). */}
+        <div style={{ position: "absolute", left: 120, top: 170, display: "flex", flexDirection: "column", gap: 40, maxWidth: 560 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
           <div
             style={{
               fontFamily: "var(--font-mono)",
@@ -405,11 +409,9 @@ export default function Escales() {
         {/* visuel du projet */}
         <div
           style={{
-            position: "absolute",
-            left: 122,
-            top: 636,
             width: 440,
             height: 220,
+            flexShrink: 0,
             borderRadius: 20,
             border: "1.5px dashed rgba(183, 166, 240, 0.45)",
             background:
@@ -421,6 +423,7 @@ export default function Escales() {
           }}
         >
           <div style={{ fontFamily: "var(--font-mono)", fontSize: 15, color: "#8F84C4" }}>{proj.visuel}</div>
+        </div>
         </div>
       </div>
     </section>
