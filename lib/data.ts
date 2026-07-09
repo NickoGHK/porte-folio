@@ -68,48 +68,80 @@ export const defsLunes = [
   { key: "outils" as ApSection, label: " OUTILS", left: 1160, top: 740, dur: 10, delay: 1.5, bg: "radial-gradient(circle at 35% 30%, #9FE8E4, #3E8F8B)" },
 ];
 
+export type MediaItem =
+  | { type: "image"; src: string; alt?: string }
+  | { type: "video"; src: string; poster: string };
+
+const img = (src: string, alt?: string): MediaItem => ({ type: "image", src: `/assets/projects/${src}`, alt });
+const vid = (src: string, poster: string): MediaItem => ({ type: "video", src: `/assets/projects/${src}`, poster: `/assets/projects/${poster}` });
+
 export const projets = [
   {
     titre: "Boréale — identité de marque",
     desc: "Refonte complète d'une identité visuelle : logotype, packaging et déclinaisons print. Un système graphique inspiré des aurores, construit sous Illustrator.",
     tags: ["Identité", "Packaging", "Illustrator"],
-    visuel: "[ visuel du projet — mockup packaging ]",
     bg: "radial-gradient(circle at 32% 28%, #FFC894 0%, #FF9C74 38%, #C75E74 68%, #5C2A5E 100%)",
+    cover: img("docklight-logo.png", "Boréale — logo"),
+    gallery: [
+      img("docklight-logo.png", "Boréale — logo"),
+      img("docklight-mascotte.png", "Boréale — mascotte"),
+      img("docklight-token.png", "Boréale — token"),
+      img("docklight-forme.jpg", "Boréale — exploration de formes"),
+    ],
   },
   {
     titre: "Atelier Racine — direction artistique",
     desc: "Direction artistique complète pour un collectif d'artisans : charte, supports print et signalétique, en écho au premier métier de Nicolas, le bois.",
     tags: ["Direction artistique", "Print", "Photoshop"],
-    visuel: "[ visuel du projet — charte & signalétique ]",
     bg: "radial-gradient(circle at 32% 28%, #A8F0E8 0%, #5FC4BC 38%, #2E7A8A 68%, #1C3A5E 100%)",
+    cover: img("branding-guide-01-cover.jpg", "Atelier Racine — couverture"),
+    gallery: [
+      img("branding-guide-01-cover.jpg", "Couverture"),
+      img("branding-guide-02-concept.jpg", "Concept"),
+      img("branding-guide-03-colors.jpg", "Palette"),
+      img("branding-guide-04-badge.jpg", "Badge"),
+      img("branding-guide-05-mockup.jpg", "Mockup"),
+    ],
   },
   {
     titre: "Lumen — affiches de festival",
     desc: "Série d'affiches typographiques pour un festival de lumière : compositions grand format, jeux de dégradés et hiérarchies affirmées.",
     tags: ["Affiche", "Typographie", "InDesign"],
-    visuel: "[ visuel du projet — série d'affiches ]",
     bg: "radial-gradient(circle at 32% 28%, #EADFFF 0%, #B79BE8 38%, #7C63C8 68%, #3A2A6E 100%)",
+    cover: img("jika-affichette.jpg", "Lumen — affichette"),
+    gallery: [
+      img("jika-affichette.jpg", "Affichette"),
+      img("jika-cartinv.jpg", "Carte d'invitation"),
+      img("jika-post-fv.jpg", "Post réseaux sociaux"),
+    ],
   },
   {
     titre: "Éther — couvertures de saga",
     desc: "Couvertures et cartes illustrées pour une saga fantasy au long cours — le monde que Nicolas écrit et illustre sous Procreate.",
     tags: ["Illustration", "Procreate", "Worldbuilding"],
-    visuel: "[ visuel du projet — couverture & carte ]",
     bg: "radial-gradient(circle at 32% 28%, #FFB6C8 0%, #F07898 38%, #B04878 68%, #4A2050 100%)",
+    cover: img("souvenir.jpg", "Éther — couverture"),
+    gallery: [img("souvenir.jpg", "Couverture"), img("robia.jpg", "Personnage")],
   },
   {
     titre: "Nova — adaptation FR de webtoon",
     desc: "Traduction et lettrage d'un webtoon anglais : adaptation typographique des bulles, onomatopées redessinées, cohérence sur 40 épisodes.",
     tags: ["Lettrage", "Traduction", "Édition"],
-    visuel: "[ visuel du projet — planche lettrée ]",
     bg: "radial-gradient(circle at 32% 28%, #A8C8FF 0%, #6E92E8 38%, #4A5EC0 68%, #22285E 100%)",
+    cover: img("laura-emote.jpg", "Nova — planche"),
+    gallery: [img("laura-emote.jpg", "Planche lettrée")],
   },
   {
     titre: "Dérives — série générative",
-    desc: "Recherche visuelle mêlant IA générative et retouche : une série d'images oniriques, curatée et retravaillée image par image.",
+    desc: "Recherche visuelle mêlant IA générative et retouche : une série d'images oniriques, curatée et retravaillée image par image, plus un teaser vidéo du processus.",
     tags: ["IA générative", "Recherche", "Figma"],
-    visuel: "[ visuel du projet — série d'images ]",
     bg: "radial-gradient(circle at 32% 28%, #FFE2A0 0%, #F0B860 38%, #C07840 68%, #5E3A28 100%)",
+    cover: vid("teaser-compressed.mp4", "teaser-poster.jpg"),
+    gallery: [
+      vid("teaser-compressed.mp4", "teaser-poster.jpg"),
+      img("nos-amies-p.jpg", "Série — post"),
+      img("nos-amies-s.jpg", "Série — story"),
+    ],
   },
 ];
 

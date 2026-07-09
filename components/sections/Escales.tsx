@@ -1,7 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Image from "next/image";
 import StarField from "@/components/StarField";
+import EscaleGallery from "@/components/EscaleGallery";
 import { projets } from "@/lib/data";
 
 const N = projets.length;
@@ -42,6 +44,8 @@ function easeInOutCubic(p: number) {
 export default function Escales() {
   const [idx, setIdx] = useState(0);
   const [rot, setRot] = useState(0);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
   const rafRef = useRef<number | null>(null);
 
   const animateTo = (target: number, from: number) => {
@@ -406,26 +410,76 @@ export default function Escales() {
           </div>
         </div>
 
-        {/* visuel du projet */}
+        {/* visuel du projet — hublot cliquable vers la galerie */}
         <div
+          onClick={() => {
+            setGalleryIndex(0);
+            setGalleryOpen(true);
+          }}
+          className="escale-porthole"
           style={{
+            position: "relative",
             width: 440,
             height: 220,
             flexShrink: 0,
             borderRadius: 20,
-            border: "1.5px dashed rgba(183, 166, 240, 0.45)",
-            background:
-              "repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.045) 0px, rgba(255, 255, 255, 0.045) 12px, rgba(21, 16, 64, 0) 12px, rgba(21, 16, 64, 0) 24px), #141040",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            border: "1.5px solid rgba(255, 217, 160, 0.4)",
+            boxShadow: "0 0 40px rgba(168, 120, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08)",
+            background: "#141040",
+            overflow: "hidden",
+            cursor: "pointer",
             animation: "floaty 8s ease-in-out infinite",
           }}
         >
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: 15, color: "#8F84C4" }}>{proj.visuel}</div>
+          {proj.cover.type === "image" ? (
+            <Image src={proj.cover.src} alt={proj.cover.alt || proj.titre} fill sizes="440px" style={{ objectFit: "cover" }} />
+          ) : (
+            <Image src={proj.cover.poster} alt={proj.titre} fill sizes="440px" style={{ objectFit: "cover" }} />
+          )}
+          <div
+            className="escale-porthole-overlay"
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              background: "rgba(11, 8, 34, 0.55)",
+              color: "#F6F1FF",
+              fontFamily: "var(--font-mono)",
+              fontSize: 13,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              opacity: 0,
+              transition: "opacity 0.25s ease",
+            }}
+          >
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#FFB37A" }} />
+            {proj.gallery.length > 1 ? `voir les ${proj.gallery.length} visuels` : "voir en grand"}
+          </div>
+          {[
+            { left: 10, top: 10 },
+            { right: 10, top: 10 },
+            { left: 10, bottom: 10 },
+            { right: 10, bottom: 10 },
+          ].map((pos, i) => (
+            <div key={i} style={{ position: "absolute", width: 6, height: 6, borderRadius: "50%", background: "rgba(255, 217, 160, 0.7)", ...pos }} />
+          ))}
         </div>
         </div>
       </div>
+
+      {galleryOpen && (
+        <EscaleGallery
+          titre={proj.titre}
+          tags={proj.tags}
+          items={proj.gallery}
+          index={galleryIndex}
+          onIndex={setGalleryIndex}
+          onClose={() => setGalleryOpen(false)}
+        />
+      )}
     </section>
   );
 }
