@@ -7,34 +7,62 @@ import EscaleGallery from "@/components/EscaleGallery";
 import { projets } from "@/lib/data";
 
 const N = projets.length;
+// Fixed angular spacing between adjacent escales, independent of how many
+// projects exist — this is what made the original 6-project orbit feel
+// like planets swinging out from behind the big planet and off past the
+// screen edge. Tying it to 360/N (as a "show them all" approach would)
+// crams everything close together once N gets large.
+const SLOT = 60;
 const TARGET_DEG = 120;
 const TILT = (-16 * Math.PI) / 180;
+// How many neighbours (each way) get an actual DOM node. Opacity fades to 0
+// by 2 slots away, so a radius well past that means spheres only ever
+// mount/unmount while already fully transparent — no popping.
+const CANDIDATE_RADIUS = Math.min(5, Math.floor((N - 1) / 2));
 
-function makeSpheres(idx: number, rot: number) {
+const mod = (n: number, m: number) => ((n % m) + m) % m;
+
+// `step` is an unbounded integer (not wrapped) — it only ever changes by
+// the exact delta the user navigates, so a project's position relative to
+// it is stable for the whole transition. `rot` is the same quantity but
+// animated smoothly toward `step` by rAF. Every visible sphere's angle is
+// therefore a continuous function of (candidateStep - rot), so entering
+// and exiting planets fade instead of jumping.
+function makeSpheres(step: number, rot: number) {
   const c = Math.cos(TILT);
   const s = Math.sin(TILT);
-  return projets.map((p, i) => {
-    const rad = ((TARGET_DEG + i * (360 / N) - rot) * Math.PI) / 180;
+  const spheres = [];
+  for (let k = -CANDIDATE_RADIUS; k <= CANDIDATE_RADIUS; k++) {
+    const candidateStep = step + k;
+    const p = projets[mod(candidateStep, N)];
+    const renderOffset = candidateStep - rot; // in slot units, continuous
+    const slotsAway = Math.abs(renderOffset);
+    const opacity = Math.max(0, Math.min(1, 2 - slotsAway));
+
+    const rad = ((TARGET_DEG + renderOffset * SLOT) * Math.PI) / 180;
     const u = 480 * Math.cos(rad);
     const v = 115 * Math.sin(rad);
     const x = u * c - v * s;
     const y = u * s + v * c;
     const depth = (Math.sin(rad) + 1) / 2;
-    const selected = i === idx;
+    const selected = candidateStep === step;
     const size = selected ? 58 : 26 + depth * 20;
-    return {
-      key: i,
+    spheres.push({
+      key: candidateStep,
+      targetStep: candidateStep,
       left: Math.round(320 + x - size / 2),
       top: Math.round(320 + y - size / 2),
       size: Math.round(size),
       bg: p.bg,
       lum: selected ? 1 : Number((0.65 + depth * 0.35).toFixed(2)),
       z: v >= -size / 2 - 2 ? 4 : 1,
+      opacity: Number(opacity.toFixed(3)),
       glow: selected
         ? "0 0 0 3px rgba(255, 217, 160, 0.7), 0 0 36px rgba(255, 217, 160, 0.55)"
         : "0 0 14px rgba(20, 14, 52, 0.5)",
-    };
-  });
+    });
+  }
+  return spheres;
 }
 
 function easeInOutCubic(p: number) {
@@ -42,49 +70,46 @@ function easeInOutCubic(p: number) {
 }
 
 export default function Escales() {
-  const [idx, setIdx] = useState(0);
+  const [step, setStep] = useState(0);
   const [rot, setRot] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const rafRef = useRef<number | null>(null);
+  const idx = mod(step, N);
 
   const animateTo = (target: number, from: number) => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     const start = from;
     const startTime = performance.now();
     const duration = 850;
-    const step = (t: number) => {
+    const anim = (t: number) => {
       const p = Math.min(1, (t - startTime) / duration);
       const e = easeInOutCubic(p);
       setRot(start + (target - start) * e);
-      if (p < 1) rafRef.current = requestAnimationFrame(step);
+      if (p < 1) rafRef.current = requestAnimationFrame(anim);
     };
-    rafRef.current = requestAnimationFrame(step);
+    rafRef.current = requestAnimationFrame(anim);
   };
 
   const precedent = () => {
-    const cible = rot - 360 / N;
-    setIdx((i) => (i - 1 + N) % N);
-    animateTo(cible, rot);
-    setRot(cible);
+    const target = step - 1;
+    setStep(target);
+    animateTo(target, rot);
   };
 
   const suivant = () => {
-    const cible = rot + 360 / N;
-    setIdx((i) => (i + 1) % N);
-    animateTo(cible, rot);
-    setRot(cible);
+    const target = step + 1;
+    setStep(target);
+    animateTo(target, rot);
   };
 
-  const pick = (i: number) => {
-    const d = (((i * (360 / N) - rot) % 360) + 540) % 360 - 180;
-    const cible = rot + d;
-    setIdx(i);
-    animateTo(cible, rot);
-    setRot(cible);
+  const pick = (targetStep: number) => {
+    if (targetStep === step) return;
+    setStep(targetStep);
+    animateTo(targetStep, rot);
   };
 
-  const spheres = makeSpheres(idx, rot);
+  const spheres = makeSpheres(step, rot);
   const proj = projets[idx];
 
   return (
@@ -283,7 +308,7 @@ export default function Escales() {
             {spheres.map((sp) => (
               <div
                 key={sp.key}
-                onClick={() => pick(sp.key)}
+                onClick={() => pick(sp.targetStep)}
                 style={{
                   position: "absolute",
                   left: sp.left,
@@ -294,9 +319,11 @@ export default function Escales() {
                   background: sp.bg,
                   filter: `brightness(${sp.lum})`,
                   zIndex: sp.z,
+                  opacity: sp.opacity,
                   boxShadow: sp.glow,
                   cursor: "pointer",
-                  transition: "box-shadow 0.4s ease",
+                  pointerEvents: sp.opacity > 0.05 ? "auto" : "none",
+                  transition: "box-shadow 0.4s ease, opacity 0.2s linear",
                 }}
               />
             ))}
@@ -318,7 +345,7 @@ export default function Escales() {
               color: "#FFB37A",
             }}
           >
-            {`escale 0${idx + 1} / 0${N}`}
+            {`escale ${String(idx + 1).padStart(2, "0")} / ${String(N).padStart(2, "0")}`}
           </div>
           <h2
             style={{
@@ -395,14 +422,14 @@ export default function Escales() {
               →
             </div>
             <div style={{ display: "flex", gap: 8, marginLeft: 4 }}>
-              {projets.map((_, i) => (
+              {Array.from({ length: 6 }, (_, i) => (
                 <div
                   key={i}
                   style={{
                     width: 9,
                     height: 9,
                     borderRadius: "50%",
-                    background: i === idx ? "#FFB37A" : "rgba(201, 188, 242, 0.35)",
+                    background: idx % 6 === i ? "#FFB37A" : "rgba(201, 188, 242, 0.35)",
                   }}
                 />
               ))}
@@ -478,6 +505,15 @@ export default function Escales() {
           index={galleryIndex}
           onIndex={setGalleryIndex}
           onClose={() => setGalleryOpen(false)}
+          onNextEscale={() => {
+            suivant();
+            setGalleryIndex(0);
+          }}
+          onPrevEscale={() => {
+            const prevIdx = (idx - 1 + N) % N;
+            precedent();
+            setGalleryIndex(projets[prevIdx].gallery.length - 1);
+          }}
         />
       )}
     </section>

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import StarField from "@/components/StarField";
 import type { MediaItem } from "@/lib/data";
+import { audioBus } from "@/lib/audioBus";
 
 export default function EscaleGallery({
   titre,
@@ -12,6 +13,8 @@ export default function EscaleGallery({
   index,
   onIndex,
   onClose,
+  onNextEscale,
+  onPrevEscale,
 }: {
   titre: string;
   tags: string[];
@@ -19,15 +22,44 @@ export default function EscaleGallery({
   index: number;
   onIndex: (i: number) => void;
   onClose: () => void;
+  onNextEscale: () => void;
+  onPrevEscale: () => void;
 }) {
   const n = items.length;
   const current = items[index];
+  const isFirst = index === 0;
+  const isLast = index === n - 1;
+  const duckedRef = useRef(false);
+
+  const goNext = () => {
+    if (isLast) onNextEscale();
+    else onIndex(index + 1);
+  };
+
+  const goPrev = () => {
+    if (isFirst) onPrevEscale();
+    else onIndex(index - 1);
+  };
+
+  const onVideoPlay = () => {
+    if (!duckedRef.current) {
+      duckedRef.current = true;
+      audioBus.duck();
+    }
+  };
+
+  const onVideoStop = () => {
+    if (duckedRef.current) {
+      duckedRef.current = false;
+      audioBus.unduck();
+    }
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft") onIndex((index - 1 + n) % n);
-      if (e.key === "ArrowRight") onIndex((index + 1) % n);
+      if (e.key === "ArrowLeft") goPrev();
+      if (e.key === "ArrowRight") goNext();
     };
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
@@ -35,7 +67,14 @@ export default function EscaleGallery({
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [index, n, onIndex, onClose]);
+  }, [index, n, onIndex, onClose, isFirst, isLast, onNextEscale, onPrevEscale]);
+
+  // Restores the ambiance if the gallery closes, or a different item is
+  // shown, while a video was still playing.
+  useEffect(() => {
+    return () => onVideoStop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current]);
 
   return (
     <div
@@ -97,8 +136,8 @@ export default function EscaleGallery({
       {/* visionneuse principale */}
       <div style={{ position: "relative", width: "100%", maxWidth: 1000, display: "flex", alignItems: "center", gap: 18 }}>
         <button
-          onClick={() => onIndex((index - 1 + n) % n)}
-          aria-label="Précédent"
+          onClick={goPrev}
+          aria-label={isFirst ? "Escale précédente" : "Précédent"}
           className="escale-arrow"
           style={{
             width: 54,
@@ -107,7 +146,7 @@ export default function EscaleGallery({
             borderRadius: "50%",
             border: "1.5px solid rgba(255, 179, 122, 0.6)",
             color: "#FFB37A",
-            display: n > 1 ? "flex" : "none",
+            display: "flex",
             alignItems: "center",
             justifyContent: "center",
             fontSize: 22,
@@ -149,14 +188,17 @@ export default function EscaleGallery({
               poster={current.poster}
               controls
               preload="metadata"
+              onPlay={onVideoPlay}
+              onPause={onVideoStop}
+              onEnded={onVideoStop}
               style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
           )}
         </div>
 
         <button
-          onClick={() => onIndex((index + 1) % n)}
-          aria-label="Suivant"
+          onClick={goNext}
+          aria-label={isLast ? "Escale suivante" : "Suivant"}
           className="escale-arrow"
           style={{
             width: 54,
@@ -165,7 +207,7 @@ export default function EscaleGallery({
             borderRadius: "50%",
             border: "1.5px solid rgba(255, 179, 122, 0.6)",
             color: "#FFB37A",
-            display: n > 1 ? "flex" : "none",
+            display: "flex",
             alignItems: "center",
             justifyContent: "center",
             fontSize: 22,

@@ -1,33 +1,23 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { audioBus } from "@/lib/audioBus";
 
 export default function AudioPlayer() {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [vol, setVol] = useState(0.6);
   const [muet, setMuet] = useState(true);
 
-  const ensureAudio = () => {
-    if (audioRef.current) return audioRef.current;
-    const a = new Audio("/assets/ambiance.mp3");
-    a.loop = true;
-    a.volume = vol;
-    audioRef.current = a;
-    return a;
-  };
-
   const toggleSon = () => {
-    const audio = ensureAudio();
     const nextMuet = !muet;
     let v = vol;
     if (!nextMuet && v === 0) v = 0.6;
     setMuet(nextMuet);
     setVol(v);
+    audioBus.setUserVolume(v);
     if (nextMuet) {
-      audio.pause();
+      audioBus.pause();
     } else {
-      audio.volume = v;
-      audio.play().catch(() => {});
+      audioBus.play();
     }
   };
 
@@ -35,10 +25,9 @@ export default function AudioPlayer() {
     const f = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     setVol(f);
     setMuet(f === 0);
-    const audio = ensureAudio();
-    audio.volume = f;
-    if (f > 0 && audio.paused) audio.play().catch(() => {});
-    if (f === 0) audio.pause();
+    audioBus.setUserVolume(f);
+    if (f > 0 && !audioBus.isPlaying()) audioBus.play();
+    if (f === 0) audioBus.pause();
   };
 
   const onVolDown = (e: React.MouseEvent<HTMLDivElement>) => {
