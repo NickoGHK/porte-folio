@@ -6,6 +6,7 @@ import StarField from "@/components/StarField";
 import EscaleGallery from "@/components/EscaleGallery";
 import BlurReveal from "@/components/BlurReveal";
 import BorderGlow from "@/components/BorderGlow";
+import { useSwipe } from "@/lib/useSwipe";
 import { projets } from "@/lib/data";
 
 const N = projets.length;
@@ -110,6 +111,10 @@ export default function Escales() {
     setStep(targetStep);
     animateTo(targetStep, rot);
   };
+
+  // Mobile-only: swipe the porthole cover left/right to change escale,
+  // alongside the existing arrow buttons.
+  const portholeSwipe = useSwipe(suivant, precedent);
 
   const spheres = makeSpheres(step, rot);
   const proj = projets[idx];
@@ -550,9 +555,15 @@ export default function Escales() {
           style={{ margin: 0, fontFamily: "var(--font-display)", fontSize: "clamp(28px, 7.5vw, 38px)", fontWeight: 720, lineHeight: 1.08, color: "#F6F1FF" }}
         />
 
-        <div style={{ position: "relative", width: "100%", height: 200, animation: "floaty 8s ease-in-out infinite" }}>
+        <div
+          style={{ position: "relative", width: "100%", height: 200, animation: "floaty 8s ease-in-out infinite" }}
+          onTouchStart={portholeSwipe.onTouchStart}
+          onTouchMove={portholeSwipe.onTouchMove}
+          onTouchEnd={portholeSwipe.onTouchEnd}
+        >
           <BorderGlow
             onClick={() => {
+              if (portholeSwipe.consumeDrag()) return;
               setGalleryIndex(0);
               setGalleryOpen(true);
             }}

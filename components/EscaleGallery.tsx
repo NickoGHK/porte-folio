@@ -7,6 +7,7 @@ import BlurReveal from "@/components/BlurReveal";
 import BorderGlow from "@/components/BorderGlow";
 import type { MediaItem } from "@/lib/data";
 import { audioBus } from "@/lib/audioBus";
+import { useSwipe } from "@/lib/useSwipe";
 
 const CLOSE_MS = 260;
 
@@ -71,6 +72,11 @@ export default function EscaleGallery({
     if (isFirst) onPrevEscale();
     else onIndex(index - 1);
   };
+
+  // Mobile-only: swipe the main image left/right, alongside the arrow
+  // buttons — disabled on video items so it doesn't fight the native
+  // scrub controls.
+  const imageSwipe = useSwipe(goNext, goPrev);
 
   const onVideoPlay = () => {
     if (!duckedRef.current) {
@@ -238,7 +244,7 @@ export default function EscaleGallery({
           <button
             onClick={goPrev}
             aria-label={isFirst ? "Escale précédente" : "Précédent"}
-            className="escale-arrow"
+            className="escale-arrow gallery-nav-arrow"
             style={{
               width: 54,
               height: 54,
@@ -257,13 +263,19 @@ export default function EscaleGallery({
             ←
           </button>
 
+          <div
+            style={{ flex: 1, height: "min(60vh, 640px)" }}
+            onTouchStart={current.type === "image" ? imageSwipe.onTouchStart : undefined}
+            onTouchMove={current.type === "image" ? imageSwipe.onTouchMove : undefined}
+            onTouchEnd={current.type === "image" ? imageSwipe.onTouchEnd : undefined}
+          >
           <BorderGlow
             key={index}
             className="gallery-frame"
             backgroundColor="#0E0926"
             borderRadius={20}
             glowRadius={44}
-            style={{ flex: 1, height: "min(60vh, 640px)", display: "flex", alignItems: "center", justifyContent: "center" }}
+            style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}
           >
             <GalleryCorner style={{ left: 10, top: 10 }} />
             <GalleryCorner style={{ right: 10, top: 10 }} />
@@ -286,11 +298,12 @@ export default function EscaleGallery({
               />
             )}
           </BorderGlow>
+          </div>
 
           <button
             onClick={goNext}
             aria-label={isLast ? "Escale suivante" : "Suivant"}
-            className="escale-arrow"
+            className="escale-arrow gallery-nav-arrow"
             style={{
               width: 54,
               height: 54,
