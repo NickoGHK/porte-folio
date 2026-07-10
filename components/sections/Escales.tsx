@@ -114,7 +114,7 @@ export default function Escales() {
 
   // Mobile-only: swipe the porthole cover left/right to change escale,
   // alongside the existing arrow buttons.
-  const portholeSwipe = useSwipe(suivant, precedent);
+  const portholeSwipe = useSwipe({ onLeft: suivant, onRight: precedent });
 
   const spheres = makeSpheres(step, rot);
   const proj = projets[idx];

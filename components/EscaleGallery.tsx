@@ -77,8 +77,11 @@ export default function EscaleGallery({
   // The gallery's own prev/next arrows are hidden on mobile (see
   // .gallery-nav-arrow in globals.css), so on a video slide this is the
   // only way to move on without reaching for a thumbnail — it has to work
-  // there too, not just on images.
-  const imageSwipe = useSwipe(goNext, goPrev);
+  // there too, not just on images. Swipe up closes the gallery: on mobile
+  // Chrome the address bar can sit right over the close button, making it
+  // unreachable. The hook locks onto whichever axis moves first, so an
+  // up-swipe can never also register as a left/right navigation.
+  const imageSwipe = useSwipe({ onLeft: goNext, onRight: goPrev, onUp: onClose });
 
   const onVideoPlay = () => {
     if (!duckedRef.current) {
