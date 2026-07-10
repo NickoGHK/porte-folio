@@ -37,7 +37,6 @@ const SECTION_IDS = ["accueil", "apropos", "escales", "contact"];
 export function useScrollFX() {
   const [activeSection, setActiveSection] = useState("accueil");
   const activeSectionRef = useRef(activeSection);
-  const heroAnchor = useRef<{ x: number; y: number } | null>(null);
   const lastRocketRot = useRef(0);
   const rafRef = useRef<number | null>(null);
   const parallaxCache = useRef(new WeakMap<Element, number>());
@@ -108,15 +107,14 @@ export function useScrollFX() {
         const iw = window.innerWidth;
         const ih = window.innerHeight;
 
-        if (!heroAnchor.current) {
-          const sceneLeft = iw / 2 - 720;
-          heroAnchor.current = {
-            x: sceneLeft + 700 + 27,
-            y: accEl.offsetTop + accEl.offsetHeight - 196 - 64,
-          };
-        }
-        const heroX = heroAnchor.current.x;
-        const heroY = heroAnchor.current.y - window.scrollY;
+        // Recomputed every frame rather than cached on first tick: the
+        // canvas's on-screen left edge (sceneLeft) depends on the current
+        // viewport width, which can still be settling (scrollbar appearing,
+        // window resize) right after mount — caching it once risked baking
+        // in a stale value for the whole page lifetime.
+        const sceneLeft = iw / 2 - 720;
+        const heroX = sceneLeft + 700 + 27;
+        const heroY = accEl.offsetTop + accEl.offsetHeight - 196 - 64 - window.scrollY;
 
         const pts: Point[] = [
           { at: 0.0, x: heroX, y: heroY },

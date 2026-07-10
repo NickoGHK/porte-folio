@@ -209,7 +209,7 @@ export default function Hero() {
           <div style={{ fontSize: 21, lineHeight: 1.6, color: "#B9AEDC", maxWidth: 460 }}>
             <BlurReveal as="span" text="Chaque projet est une escale dans l'espace." delay={40} duration={0.9} style={{ display: "inline-flex" }} />
             <br />
-            <BlurReveal as="span" text="Le voyage commence ici, et finit… ici aussi." delay={40} duration={0.9} style={{ display: "inline-flex" }} />
+            <BlurReveal as="span" text="Le voyage commence ici." delay={40} duration={0.9} style={{ display: "inline-flex" }} />
           </div>
         </div>
       </div>
@@ -271,7 +271,7 @@ export default function Hero() {
         <div style={{ fontSize: 16, lineHeight: 1.55, color: "#B9AEDC", maxWidth: 400 }}>
           <BlurReveal as="span" text="Chaque projet est une escale dans l'espace." delay={40} duration={0.9} style={{ display: "inline-flex" }} />
           <br />
-          <BlurReveal as="span" text="Le voyage commence ici, et finit… ici aussi." delay={40} duration={0.9} style={{ display: "inline-flex" }} />
+          <BlurReveal as="span" text="Le voyage commence ici." delay={40} duration={0.9} style={{ display: "inline-flex" }} />
         </div>
       </div>
 
