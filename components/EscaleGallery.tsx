@@ -7,7 +7,7 @@ import BlurReveal from "@/components/BlurReveal";
 import BorderGlow from "@/components/BorderGlow";
 import type { MediaItem } from "@/lib/data";
 import { audioBus } from "@/lib/audioBus";
-import { useSwipe } from "@/lib/useSwipe";
+import { useDragSlide } from "@/lib/useDragSlide";
 
 const CLOSE_MS = 260;
 
@@ -38,6 +38,12 @@ export default function EscaleGallery({
   const isLast = index === n - 1;
   const duckedRef = useRef(false);
   const viewerRowRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const frameWrapRef = useRef<HTMLDivElement>(null);
+  // Set right before a drag-driven close, so the phase effect below skips
+  // replaying the CSS exit animation on top of the drag's own fling-out —
+  // the panel already visually left, no need to fade it out a second time.
+  const dragClosedRef = useRef(false);
 
   // Kept mounted through the "closing" phase so the exit transition can
   // play — the parent just toggles `open`, this component decides when it
@@ -52,6 +58,9 @@ export default function EscaleGallery({
     }
     if (open) {
       setPhase("open");
+    } else if (dragClosedRef.current) {
+      dragClosedRef.current = false;
+      setPhase("closed");
     } else {
       setPhase((p) => (p === "closed" ? "closed" : "closing"));
     }
@@ -73,15 +82,33 @@ export default function EscaleGallery({
     else onIndex(index - 1);
   };
 
-  // Mobile-only: swipe left/right to browse, on images and videos alike.
-  // The gallery's own prev/next arrows are hidden on mobile (see
-  // .gallery-nav-arrow in globals.css), so on a video slide this is the
-  // only way to move on without reaching for a thumbnail — it has to work
-  // there too, not just on images. Swipe up closes the gallery: on mobile
-  // Chrome the address bar can sit right over the close button, making it
-  // unreachable. The hook locks onto whichever axis moves first, so an
-  // up-swipe can never also register as a left/right navigation.
-  const imageSwipe = useSwipe({ onLeft: goNext, onRight: goPrev, onUp: onClose });
+  // Mobile-only: swipe left/right to browse (images and videos alike — the
+  // gallery's own prev/next arrows are hidden on mobile, see
+  // .gallery-nav-arrow in globals.css, so on a video slide this is the only
+  // way to move on without reaching for a thumbnail), or swipe up to close
+  // (mobile Chrome's address bar can sit right over the close button,
+  // making it unreachable). The image card live-follows left/right; the
+  // whole panel live-follows an upward drag — the hook locks onto whichever
+  // axis moves first, so an up-swipe can never also register as a
+  // left/right navigation. Same DOM node reused across an index change
+  // (BorderGlow remounts via `key`, but this wrapper doesn't), so
+  // resetAfterCommit() has to run once `index` actually changes.
+  const imageDrag = useDragSlide(
+    frameWrapRef,
+    {
+      onCommitLeft: goNext,
+      onCommitRight: goPrev,
+      onCommitUp: () => {
+        dragClosedRef.current = true;
+        onClose();
+      },
+    },
+    panelRef
+  );
+  useEffect(() => {
+    imageDrag.resetAfterCommit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
 
   const onVideoPlay = () => {
     if (!duckedRef.current) {
@@ -178,6 +205,7 @@ export default function EscaleGallery({
       </div>
 
       <div
+        ref={panelRef}
         style={{
           position: "relative",
           display: "flex",
@@ -269,10 +297,11 @@ export default function EscaleGallery({
           </button>
 
           <div
+            ref={frameWrapRef}
             style={{ flex: 1, height: "min(60vh, 640px)" }}
-            onTouchStart={imageSwipe.onTouchStart}
-            onTouchMove={imageSwipe.onTouchMove}
-            onTouchEnd={imageSwipe.onTouchEnd}
+            onTouchStart={imageDrag.onTouchStart}
+            onTouchMove={imageDrag.onTouchMove}
+            onTouchEnd={imageDrag.onTouchEnd}
           >
           <BorderGlow
             key={index}

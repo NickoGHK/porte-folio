@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import StarField from "@/components/StarField";
 import EscaleGallery from "@/components/EscaleGallery";
 import BlurReveal from "@/components/BlurReveal";
 import BorderGlow from "@/components/BorderGlow";
-import { useSwipe } from "@/lib/useSwipe";
+import { useDragSlide } from "@/lib/useDragSlide";
 import { projets } from "@/lib/data";
 
 const N = projets.length;
@@ -113,8 +113,16 @@ export default function Escales() {
   };
 
   // Mobile-only: swipe the porthole cover left/right to change escale,
-  // alongside the existing arrow buttons.
-  const portholeSwipe = useSwipe({ onLeft: suivant, onRight: precedent });
+  // alongside the existing arrow buttons. The cover live-follows the drag
+  // and either springs back or flings off + fades the next one in — the
+  // same DOM node's src just changes underneath (no key-based remount), so
+  // resetAfterCommit() has to run once `idx` actually changes.
+  const portholeDragRef = useRef<HTMLDivElement>(null);
+  const portholeSwipe = useDragSlide(portholeDragRef, { onCommitLeft: suivant, onCommitRight: precedent });
+  useEffect(() => {
+    portholeSwipe.resetAfterCommit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx]);
 
   const spheres = makeSpheres(step, rot);
   const proj = projets[idx];
@@ -555,46 +563,49 @@ export default function Escales() {
           style={{ margin: 0, fontFamily: "var(--font-display)", fontSize: "clamp(28px, 7.5vw, 38px)", fontWeight: 720, lineHeight: 1.08, color: "#F6F1FF" }}
         />
 
-        <div
-          style={{ position: "relative", width: "100%", height: 200, animation: "floaty 8s ease-in-out infinite" }}
-          onTouchStart={portholeSwipe.onTouchStart}
-          onTouchMove={portholeSwipe.onTouchMove}
-          onTouchEnd={portholeSwipe.onTouchEnd}
-        >
-          <BorderGlow
-            onClick={() => {
-              if (portholeSwipe.consumeDrag()) return;
-              setGalleryIndex(0);
-              setGalleryOpen(true);
-            }}
-            style={{ width: "100%", height: "100%", cursor: "pointer" }}
-            borderRadius={18}
+        <div style={{ position: "relative", width: "100%", height: 200, animation: "floaty 8s ease-in-out infinite" }}>
+          <div
+            ref={portholeDragRef}
+            style={{ width: "100%", height: "100%" }}
+            onTouchStart={portholeSwipe.onTouchStart}
+            onTouchMove={portholeSwipe.onTouchMove}
+            onTouchEnd={portholeSwipe.onTouchEnd}
           >
-            {proj.cover.type === "image" ? (
-              <Image src={proj.cover.src} alt={proj.cover.alt || proj.titre} fill sizes="100vw" style={{ objectFit: "cover" }} />
-            ) : (
-              <Image src={proj.cover.poster} alt={proj.titre} fill sizes="100vw" style={{ objectFit: "cover" }} />
-            )}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                display: "flex",
-                alignItems: "flex-end",
-                padding: 12,
-                background: "linear-gradient(0deg, rgba(11, 8, 34, 0.75), transparent 55%)",
-                color: "#F6F1FF",
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                gap: 8,
+            <BorderGlow
+              onClick={() => {
+                if (portholeSwipe.consumeDrag()) return;
+                setGalleryIndex(0);
+                setGalleryOpen(true);
               }}
+              style={{ width: "100%", height: "100%", cursor: "pointer" }}
+              borderRadius={18}
             >
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FFB37A", flexShrink: 0, alignSelf: "center" }} />
-              {proj.gallery.length > 1 ? `voir les ${proj.gallery.length} visuels` : "voir en grand"}
-            </div>
-          </BorderGlow>
+              {proj.cover.type === "image" ? (
+                <Image src={proj.cover.src} alt={proj.cover.alt || proj.titre} fill sizes="100vw" style={{ objectFit: "cover" }} />
+              ) : (
+                <Image src={proj.cover.poster} alt={proj.titre} fill sizes="100vw" style={{ objectFit: "cover" }} />
+              )}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "flex",
+                  alignItems: "flex-end",
+                  padding: 12,
+                  background: "linear-gradient(0deg, rgba(11, 8, 34, 0.75), transparent 55%)",
+                  color: "#F6F1FF",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 11,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  gap: 8,
+                }}
+              >
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FFB37A", flexShrink: 0, alignSelf: "center" }} />
+                {proj.gallery.length > 1 ? `voir les ${proj.gallery.length} visuels` : "voir en grand"}
+              </div>
+            </BorderGlow>
+          </div>
         </div>
 
         <BlurReveal as="div" text={proj.desc} delay={22} duration={0.75} style={{ fontSize: 15, lineHeight: 1.55, color: "#B9AEDC" }} />
