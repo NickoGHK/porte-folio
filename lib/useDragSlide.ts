@@ -5,12 +5,12 @@ import { useRef } from "react";
 interface DragSlideOptions {
   onCommitLeft?: () => void;
   onCommitRight?: () => void;
-  /** Optional: recognizes an upward drag as a distinct gesture (e.g. "close"). */
-  onCommitUp?: () => void;
+  /** Optional: recognizes a downward drag as a distinct gesture (e.g. "close"). */
+  onCommitDown?: () => void;
   /** px of horizontal movement to commit a left/right swap instead of springing back. */
   threshold?: number;
-  /** px of upward movement to commit onCommitUp instead of springing back. */
-  verticalThreshold?: number;
+  /** Fraction (0–1) of viewport height to drag down before onCommitDown fires instead of springing back. */
+  verticalThresholdRatio?: number;
 }
 
 const SPRING = "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease";
@@ -27,10 +27,10 @@ const FLING = "transform 0.2s ease, opacity 0.2s ease";
 // The gesture's axis is locked on its first meaningful movement and held
 // for the whole touch: a diagonal drag commits to whichever direction it
 // first moved further in, so it can only ever drive ONE of (left/right) or
-// (up) — never both, and never the wrong one from a diagonal finger.
+// (down) — never both, and never the wrong one from a diagonal finger.
 //
 // `verticalRef` lets the vertical gesture drive a different element than
-// the horizontal one (e.g. the whole gallery panel dismisses on swipe-up,
+// the horizontal one (e.g. the whole gallery panel dismisses on swipe-down,
 // while only the image card itself pans on swipe left/right) — defaults to
 // the same ref when omitted.
 export function useDragSlide(
@@ -38,7 +38,7 @@ export function useDragSlide(
   options: DragSlideOptions,
   verticalRef?: React.RefObject<HTMLElement | null>
 ) {
-  const { onCommitLeft, onCommitRight, onCommitUp, threshold = 60, verticalThreshold = 90 } = options;
+  const { onCommitLeft, onCommitRight, onCommitDown, threshold = 60, verticalThresholdRatio = 0.5 } = options;
   const vRef = verticalRef ?? primaryRef;
 
   const startX = useRef<number | null>(null);
@@ -80,10 +80,10 @@ export function useDragSlide(
     const dy = t.clientY - startY.current;
     if (axis.current === null && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
       if (Math.abs(dx) > Math.abs(dy)) axis.current = "x";
-      else if (onCommitUp && dy < 0) axis.current = "y";
-      // A downward-dominant drag with no onCommitUp handler for it (or an
-      // onCommitUp caller that only wants "up") stays unlocked — not a
-      // gesture we handle, so we leave it alone rather than eat the touch.
+      else if (onCommitDown && dy > 0) axis.current = "y";
+      // An upward-dominant drag, or a downward one with no onCommitDown
+      // handler, stays unlocked — not a gesture we handle, so we leave it
+      // alone rather than eat the touch.
     }
     if (axis.current === "x") {
       dragged.current = true;
@@ -99,9 +99,14 @@ export function useDragSlide(
       e.preventDefault();
       const el = vRef.current;
       if (el) {
+        // Fades toward ~0.15 opacity as the drag approaches the close
+        // threshold, so the window visibly "runs out" — a clearer signal
+        // of where the release point is than a flat, capped fade would be.
+        const vh = window.innerHeight;
+        const progress = Math.min(1, dy / (vh * verticalThresholdRatio));
         el.style.transition = "none";
         el.style.transform = `translateY(${dy}px)`;
-        el.style.opacity = String(1 - Math.min(0.6, Math.abs(dy) / 300));
+        el.style.opacity = String(1 - progress * 0.85);
       }
     }
   };
@@ -137,14 +142,15 @@ export function useDragSlide(
         resetX(true);
       }
     } else if (lockedAxis === "y") {
-      if (dy <= -verticalThreshold && onCommitUp) {
+      const vh = window.innerHeight;
+      if (dy >= vh * verticalThresholdRatio && onCommitDown) {
         const el = vRef.current;
         if (el) {
           el.style.transition = FLING;
-          el.style.transform = "translateY(-100vh)";
+          el.style.transform = "translateY(100vh)";
           el.style.opacity = "0";
         }
-        window.setTimeout(onCommitUp, 190);
+        window.setTimeout(onCommitDown, 190);
       } else {
         resetY(true);
       }

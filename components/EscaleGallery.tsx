@@ -85,20 +85,22 @@ export default function EscaleGallery({
   // Mobile-only: swipe left/right to browse (images and videos alike — the
   // gallery's own prev/next arrows are hidden on mobile, see
   // .gallery-nav-arrow in globals.css, so on a video slide this is the only
-  // way to move on without reaching for a thumbnail), or swipe up to close
+  // way to move on without reaching for a thumbnail), or drag down to close
   // (mobile Chrome's address bar can sit right over the close button,
-  // making it unreachable). The image card live-follows left/right; the
-  // whole panel live-follows an upward drag — the hook locks onto whichever
-  // axis moves first, so an up-swipe can never also register as a
-  // left/right navigation. Same DOM node reused across an index change
-  // (BorderGlow remounts via `key`, but this wrapper doesn't), so
-  // resetAfterCommit() has to run once `index` actually changes.
+  // making it unreachable) — the panel follows the finger down and closes
+  // once dragged past half the screen, or springs back up if released
+  // short of that. The image card live-follows left/right; the whole panel
+  // live-follows the downward drag — the hook locks onto whichever axis
+  // moves first, so a down-swipe can never also register as a left/right
+  // navigation. Same DOM node reused across an index change (BorderGlow
+  // remounts via `key`, but this wrapper doesn't), so resetAfterCommit()
+  // has to run once `index` actually changes.
   const imageDrag = useDragSlide(
     frameWrapRef,
     {
       onCommitLeft: goNext,
       onCommitRight: goPrev,
-      onCommitUp: () => {
+      onCommitDown: () => {
         dragClosedRef.current = true;
         onClose();
       },
