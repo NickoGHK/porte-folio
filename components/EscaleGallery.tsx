@@ -73,9 +73,11 @@ export default function EscaleGallery({
     else onIndex(index - 1);
   };
 
-  // Mobile-only: swipe the main image left/right, alongside the arrow
-  // buttons — disabled on video items so it doesn't fight the native
-  // scrub controls.
+  // Mobile-only: swipe left/right to browse, on images and videos alike.
+  // The gallery's own prev/next arrows are hidden on mobile (see
+  // .gallery-nav-arrow in globals.css), so on a video slide this is the
+  // only way to move on without reaching for a thumbnail — it has to work
+  // there too, not just on images.
   const imageSwipe = useSwipe(goNext, goPrev);
 
   const onVideoPlay = () => {
@@ -265,9 +267,9 @@ export default function EscaleGallery({
 
           <div
             style={{ flex: 1, height: "min(60vh, 640px)" }}
-            onTouchStart={current.type === "image" ? imageSwipe.onTouchStart : undefined}
-            onTouchMove={current.type === "image" ? imageSwipe.onTouchMove : undefined}
-            onTouchEnd={current.type === "image" ? imageSwipe.onTouchEnd : undefined}
+            onTouchStart={imageSwipe.onTouchStart}
+            onTouchMove={imageSwipe.onTouchMove}
+            onTouchEnd={imageSwipe.onTouchEnd}
           >
           <BorderGlow
             key={index}
