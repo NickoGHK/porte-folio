@@ -388,6 +388,10 @@ button {
   color: #ffd9a0 !important;
 }
 
+.gallery-escale-nav:hover {
+  color: #ffb37a !important;
+}
+
 .audio-icon:hover {
   filter: brightness(1.35);
 }

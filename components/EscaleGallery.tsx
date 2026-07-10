@@ -358,6 +358,56 @@ export default function EscaleGallery({
             ))}
           </div>
         )}
+
+        {/* navigation d'escale — délibérément discrète et séparée des flèches
+            image (qui parcourent CE projet) : un aller simple explicite vers
+            un autre projet, pour qui le cherche, sans risquer de clics
+            accidentels sur le contrôle principal. */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: "100%",
+            maxWidth: 1000,
+            marginTop: n > 1 ? 18 : 28,
+            animation: closing ? undefined : "galleryContentIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 380ms both",
+          }}
+        >
+          <button
+            onClick={onPrevEscale}
+            className="gallery-escale-nav"
+            style={{
+              cursor: "pointer",
+              color: "rgba(201, 188, 242, 0.55)",
+              fontSize: 13,
+              letterSpacing: "0.04em",
+              transition: "color 0.2s ease",
+              // padding grows the hit area well past the visible text (so an
+              // imprecise click still registers as "on the button" instead
+              // of leaking through to the backdrop and closing the gallery)
+              // while the matching negative margin keeps it visually in place.
+              padding: "16px 20px",
+              margin: "-16px -20px",
+            }}
+          >
+            ← Escale précédente
+          </button>
+          <button
+            onClick={onNextEscale}
+            className="gallery-escale-nav"
+            style={{
+              cursor: "pointer",
+              color: "rgba(201, 188, 242, 0.55)",
+              fontSize: 13,
+              letterSpacing: "0.04em",
+              transition: "color 0.2s ease",
+              padding: "16px 20px",
+              margin: "-16px -20px",
+            }}
+          >
+            Escale suivante →
+          </button>
+        </div>
       </div>
     </div>
   );
