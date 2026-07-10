@@ -1,10 +1,12 @@
 import StarField from "@/components/StarField";
+import BlurReveal from "@/components/BlurReveal";
 
 export default function Hero() {
   return (
     <section
       id="accueil"
       data-scene="accueil"
+      className="scene-section"
       style={{
         position: "relative",
         height: "100vh",
@@ -46,32 +48,40 @@ export default function Hero() {
         />
       </div>
 
-      {/* scène centrée */}
-      <div style={{ position: "absolute", left: "50%", bottom: 0, transform: "translateX(-50%)", width: 1440, height: 900 }}>
+      {/* scène centrée — desktop / tablette (mise à l'échelle CSS en dessous de 1440px) */}
+      <div
+        className="stage-desktop stage-scale-bottom"
+        style={{ position: "absolute", left: "50%", bottom: 0, width: 1440, height: 900 }}
+      >
         <div data-parallax="-0.12" style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-          {/* lune */}
+          {/* lune — deux couches de profondeur avec des vélocités de souris
+              différentes : le halo (plus loin, dérive à peine) et le corps
+              solide + cratères (plus proche, bouge davantage). Chacune sur
+              son propre wrapper pour ne pas entrer en conflit avec le
+              transform de l'animation flottante CSS. */}
+          <div style={{ position: "absolute", right: 140, top: 90, width: 170, height: 170 }}>
+          <div data-mouse-parallax="0.018" style={{ position: "absolute", inset: -8 }}>
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: "50%",
+                border: "5px solid rgba(215, 201, 246, 0.25)",
+                filter: "blur(6px)",
+              }}
+            />
+          </div>
+          <div data-mouse-parallax="0.045" style={{ position: "absolute", inset: 0 }}>
           <div
             style={{
               position: "absolute",
-              right: 140,
-              top: 90,
-              width: 170,
-              height: 170,
+              inset: 0,
               borderRadius: "50%",
               background: "radial-gradient(circle at 34% 30%, #F7F0FF 0%, #D7C9F6 45%, #A48FE0 100%)",
               boxShadow: "0 0 90px rgba(215, 201, 246, 0.35)",
               animation: "floaty 9s ease-in-out infinite",
             }}
           >
-            <div
-              style={{
-                position: "absolute",
-                inset: -8,
-                borderRadius: "50%",
-                border: "5px solid rgba(215, 201, 246, 0.25)",
-                filter: "blur(6px)",
-              }}
-            />
             <div
               style={{
                 position: "absolute",
@@ -118,6 +128,8 @@ export default function Hero() {
               }}
             />
           </div>
+          </div>
+          </div>
 
           {/* trajectoire + satellite */}
           <div
@@ -159,7 +171,11 @@ export default function Hero() {
 
         {/* bloc titre */}
         <div style={{ position: "absolute", left: 120, top: 200, display: "flex", flexDirection: "column", gap: 18, maxWidth: 660 }}>
-          <div
+          <BlurReveal
+            as="div"
+            text="portfolio — un voyage en scroll"
+            delay={55}
+            duration={0.9}
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: 15,
@@ -167,10 +183,12 @@ export default function Hero() {
               textTransform: "uppercase",
               color: "#FFB37A",
             }}
-          >
-            portfolio — un voyage en scroll
-          </div>
-          <h1
+          />
+          <BlurReveal
+            as="h1"
+            text="Nicolas Boislard"
+            delay={110}
+            duration={1.2}
             style={{
               margin: 0,
               fontFamily: "var(--font-display)",
@@ -180,16 +198,80 @@ export default function Hero() {
               color: "#F6F1FF",
               textShadow: "0 0 60px rgba(168, 120, 255, 0.35)",
             }}
-          >
-            Nicolas Boislard
-          </h1>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: 34, fontWeight: 400, color: "#FFB37A", letterSpacing: "0.04em" }}>
-            Graphiste - Artiste Auteur
-          </div>
+          />
+          <BlurReveal
+            as="div"
+            text="Graphiste - Artiste Auteur"
+            delay={90}
+            duration={1.0}
+            style={{ fontFamily: "var(--font-display)", fontSize: 34, fontWeight: 400, color: "#FFB37A", letterSpacing: "0.04em" }}
+          />
           <div style={{ fontSize: 21, lineHeight: 1.6, color: "#B9AEDC", maxWidth: 460 }}>
-            &nbsp;Chaque projet est une escale dans l&apos;espace. <br />
-            Le voyage commence ici, et finit… ici aussi.
+            <BlurReveal as="span" text="Chaque projet est une escale dans l'espace." delay={40} duration={0.9} style={{ display: "inline-flex" }} />
+            <br />
+            <BlurReveal as="span" text="Le voyage commence ici, et finit… ici aussi." delay={40} duration={0.9} style={{ display: "inline-flex" }} />
           </div>
+        </div>
+      </div>
+
+      {/* mise en page mobile */}
+      <div
+        className="stage-mobile"
+        style={{
+          position: "relative",
+          padding: "120px 24px 170px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          gap: 20,
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            right: -30,
+            top: 24,
+            width: 84,
+            height: 84,
+            borderRadius: "50%",
+            background: "radial-gradient(circle at 34% 30%, #F7F0FF 0%, #D7C9F6 45%, #A48FE0 100%)",
+            boxShadow: "0 0 50px rgba(215, 201, 246, 0.3)",
+            animation: "floaty 9s ease-in-out infinite",
+          }}
+        />
+        <BlurReveal
+          as="div"
+          text="portfolio — un voyage en scroll"
+          delay={55}
+          duration={0.9}
+          style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", color: "#FFB37A" }}
+        />
+        <BlurReveal
+          as="h1"
+          text="Nicolas Boislard"
+          delay={110}
+          duration={1.2}
+          style={{
+            margin: 0,
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(40px, 11vw, 56px)",
+            fontWeight: 750,
+            lineHeight: 1.02,
+            color: "#F6F1FF",
+            textShadow: "0 0 40px rgba(168, 120, 255, 0.35)",
+          }}
+        />
+        <BlurReveal
+          as="div"
+          text="Graphiste - Artiste Auteur"
+          delay={90}
+          duration={1.0}
+          style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 400, color: "#FFB37A", letterSpacing: "0.03em" }}
+        />
+        <div style={{ fontSize: 16, lineHeight: 1.55, color: "#B9AEDC", maxWidth: 400 }}>
+          <BlurReveal as="span" text="Chaque projet est une escale dans l'espace." delay={40} duration={0.9} style={{ display: "inline-flex" }} />
+          <br />
+          <BlurReveal as="span" text="Le voyage commence ici, et finit… ici aussi." delay={40} duration={0.9} style={{ display: "inline-flex" }} />
         </div>
       </div>
 

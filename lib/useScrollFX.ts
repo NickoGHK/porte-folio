@@ -26,11 +26,13 @@ function catmull(p0: Point, p1: Point, p2: Point, p3: Point, u: number) {
 const SECTION_IDS = ["accueil", "apropos", "escales", "contact"];
 
 /**
- * Single rAF loop driving three imperative (non-React-state) effects, ported
+ * Single rAF loop driving four imperative (non-React-state) effects, ported
  * from the design reference: scroll-driven parallax on [data-parallax]
- * layers, the travel-rocket's Catmull-Rom flight path between the accueil
- * and apropos sections, and — the one piece that DOES feed back into React —
- * which section is centered in the viewport (for the dot nav).
+ * layers, cursor-driven parallax on [data-mouse-parallax] layers (desktop
+ * only — it's simply inert wherever mousemove never fires, e.g. touch), the
+ * travel-rocket's Catmull-Rom flight path between the accueil and apropos
+ * sections, and — the one piece that DOES feed back into React — which
+ * section is centered in the viewport (for the dot nav).
  */
 export function useScrollFX() {
   const [activeSection, setActiveSection] = useState("accueil");
@@ -39,8 +41,16 @@ export function useScrollFX() {
   const lastRocketRot = useRef(0);
   const rafRef = useRef<number | null>(null);
   const parallaxCache = useRef(new WeakMap<Element, number>());
+  const mouse = useRef({ x: 0, y: 0 });
+  const mouseParallaxState = useRef(new WeakMap<Element, { x: number; y: number }>());
 
   useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      mouse.current.x = e.clientX;
+      mouse.current.y = e.clientY;
+    };
+    window.addEventListener("mousemove", onMouseMove);
+
     const tick = () => {
       const vh = window.innerHeight;
 
@@ -70,6 +80,22 @@ export function useScrollFX() {
           parallaxCache.current.set(el, y);
           el.style.transform = `translate3d(0, ${y}px, 0)`;
         }
+      });
+
+      // cursor-follow parallax — eased toward the target each frame rather
+      // than snapping straight to it, so it reads as organic drift rather
+      // than a rigid 1:1 tracking.
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      document.querySelectorAll<HTMLElement>("[data-mouse-parallax]").forEach((el) => {
+        const strength = parseFloat(el.getAttribute("data-mouse-parallax") || "0");
+        const targetX = (mouse.current.x - cx) * strength;
+        const targetY = (mouse.current.y - cy) * strength;
+        const state = mouseParallaxState.current.get(el) || { x: 0, y: 0 };
+        state.x += (targetX - state.x) * 0.06;
+        state.y += (targetY - state.y) * 0.06;
+        mouseParallaxState.current.set(el, state);
+        el.style.transform = `translate3d(${state.x.toFixed(1)}px, ${state.y.toFixed(1)}px, 0)`;
       });
 
       const travel = document.getElementById("travel-rocket");
@@ -146,6 +172,7 @@ export function useScrollFX() {
 
     rafRef.current = requestAnimationFrame(tick);
     return () => {
+      window.removeEventListener("mousemove", onMouseMove);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, []);

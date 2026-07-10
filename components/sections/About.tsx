@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import StarField from "@/components/StarField";
+import BlurReveal from "@/components/BlurReveal";
 import { sectionsApropos, diplomes, passions, outils, defsLunes, type ApSection } from "@/lib/data";
 
 export default function About() {
@@ -12,6 +13,7 @@ export default function About() {
     <section
       id="apropos"
       data-scene="apropos"
+      className="scene-section"
       style={{
         position: "relative",
         height: "100vh",
@@ -39,7 +41,7 @@ export default function About() {
         />
       </div>
 
-      <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)", width: 1440, height: 900 }}>
+      <div className="stage-desktop stage-scale-center" style={{ position: "absolute", left: "50%", top: "50%", width: 1440, height: 900 }}>
         <div data-parallax="-0.08" style={{ position: "absolute", inset: 0 }}>
           {/* orbites + satellites */}
           <div
@@ -324,7 +326,11 @@ export default function About() {
 
         {/* texte à propos */}
         <div style={{ position: "absolute", left: 120, top: 210, display: "flex", flexDirection: "column", gap: 22, maxWidth: 470 }}>
-          <div
+          <BlurReveal
+            as="div"
+            text={current.label}
+            delay={55}
+            duration={0.9}
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: 15,
@@ -332,16 +338,16 @@ export default function About() {
               textTransform: "uppercase",
               color: "#FFB37A",
             }}
-          >
-            {current.label}
-          </div>
-          <h2 style={{ margin: 0, fontFamily: "var(--font-display)", fontSize: 66, fontWeight: 720, lineHeight: 1.02, color: "#F6F1FF" }}>
-            {current.titre}
-          </h2>
+          />
+          <BlurReveal
+            as="h2"
+            text={current.titre}
+            delay={90}
+            duration={1.1}
+            style={{ margin: 0, fontFamily: "var(--font-display)", fontSize: 66, fontWeight: 720, lineHeight: 1.02, color: "#F6F1FF" }}
+          />
           {current.paras.map((para, i) => (
-            <div key={i} style={{ fontSize: 20, lineHeight: 1.7, color: "#B9AEDC" }}>
-              {para}
-            </div>
+            <BlurReveal key={i} as="div" text={para} delay={35} duration={0.9} style={{ fontSize: 20, lineHeight: 1.7, color: "#B9AEDC" }} />
           ))}
 
           {ap === "diplomes" && (
@@ -468,6 +474,188 @@ export default function About() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* mise en page mobile */}
+      <div
+        className="stage-mobile"
+        style={{
+          position: "relative",
+          padding: "90px 24px 40px",
+          flexDirection: "column",
+          gap: 22,
+        }}
+      >
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {defsLunes.map((lune) => {
+            const active = lune.key === ap;
+            return (
+              <div
+                key={lune.key}
+                onClick={() => setAp(lune.key)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "8px 14px 8px 8px",
+                  borderRadius: 999,
+                  border: active ? "1px solid rgba(255, 217, 160, 0.7)" : "1px solid rgba(201, 188, 242, 0.25)",
+                  background: active ? "rgba(255, 179, 122, 0.12)" : "rgba(11, 8, 34, 0.4)",
+                  cursor: "pointer",
+                }}
+              >
+                <div style={{ width: 22, height: 22, borderRadius: "50%", background: lune.bg, flexShrink: 0 }} />
+                <div
+                  style={{
+                    fontSize: 12,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: active ? "#FFD9A0" : "#C9BCF2",
+                    fontWeight: active ? 700 : 400,
+                  }}
+                >
+                  {lune.label.trim()}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <BlurReveal
+          as="div"
+          text={current.label}
+          delay={55}
+          duration={0.9}
+          style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", color: "#FFB37A" }}
+        />
+        <BlurReveal
+          as="h2"
+          text={current.titre}
+          delay={90}
+          duration={1.1}
+          style={{ margin: 0, fontFamily: "var(--font-display)", fontSize: "clamp(30px, 8vw, 40px)", fontWeight: 720, lineHeight: 1.05, color: "#F6F1FF" }}
+        />
+        {current.paras.map((para, i) => (
+          <BlurReveal key={i} as="div" text={para} delay={35} duration={0.9} style={{ fontSize: 16, lineHeight: 1.6, color: "#B9AEDC" }} />
+        ))}
+
+        {ap === "diplomes" && (
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {diplomes.map((etape, i) => (
+              <div key={i} style={{ display: "flex", gap: 12 }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 10, flexShrink: 0 }}>
+                  <div
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      background: "radial-gradient(circle at 35% 30%, #D7C9F6, #7C63C8)",
+                      boxShadow: "0 0 8px rgba(215, 201, 246, 0.5)",
+                      flexShrink: 0,
+                    }}
+                  />
+                  {i < diplomes.length - 1 && (
+                    <div
+                      style={{
+                        width: 2,
+                        flex: 1,
+                        minHeight: 16,
+                        background:
+                          "repeating-linear-gradient(180deg, rgba(201, 188, 242, 0.45) 0px, rgba(201, 188, 242, 0.45) 4px, transparent 4px, transparent 8px)",
+                      }}
+                    />
+                  )}
+                </div>
+                <div style={{ paddingBottom: 12 }}>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9C8DC9" }}>
+                    {etape.periode}
+                  </div>
+                  <div style={{ fontSize: 14, color: "#F0EBFF", fontWeight: 600, marginTop: 1, lineHeight: 1.25 }}>{etape.titre}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {ap === "passions" && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 14 }}>
+            {passions.map((passion) => (
+              <div key={passion.nom} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, width: 80 }}>
+                <div
+                  style={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: 16,
+                    overflow: "hidden",
+                    background: passion.bg,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "inset 0 2px 3px rgba(255, 255, 255, 0.14), inset 0 -3px 6px rgba(0, 0, 0, 0.45), 0 8px 24px rgba(0, 0, 0, 0.35)",
+                  }}
+                >
+                  <div
+                    role="img"
+                    aria-label={passion.nom}
+                    style={{
+                      width: passion.taille * 0.9,
+                      height: passion.taille * 0.9,
+                      backgroundImage: `url(${passion.img})`,
+                      backgroundSize: "contain",
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "center",
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {ap === "outils" && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 14 }}>
+            {outils.map((outil) => (
+              <div key={outil.nom} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, width: 80 }}>
+                <div
+                  style={{
+                    position: "relative",
+                    width: 60,
+                    height: 60,
+                    borderRadius: 16,
+                    background: outil.bg,
+                    color: outil.fg,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "var(--font-display)",
+                    fontSize: 22,
+                    fontWeight: 700,
+                    boxShadow: "inset 0 2px 3px rgba(255, 255, 255, 0.14), inset 0 -3px 6px rgba(0, 0, 0, 0.45), 0 8px 24px rgba(0, 0, 0, 0.35)",
+                    overflow: "hidden",
+                  }}
+                >
+                  {outil.img ? (
+                    <div
+                      role="img"
+                      aria-label={outil.nom}
+                      style={{
+                        width: (outil.taille ?? 40) * 0.9,
+                        height: (outil.taille ?? 40) * 0.9,
+                        backgroundImage: `url(${outil.img})`,
+                        backgroundSize: "contain",
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "center",
+                      }}
+                    />
+                  ) : (
+                    <span>{outil.mono}</span>
+                  )}
+                </div>
+                <div style={{ fontSize: 12, color: "#C9BCF2", textAlign: "center" }}>{outil.nom}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -4,6 +4,8 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import StarField from "@/components/StarField";
 import EscaleGallery from "@/components/EscaleGallery";
+import BlurReveal from "@/components/BlurReveal";
+import BorderGlow from "@/components/BorderGlow";
 import { projets } from "@/lib/data";
 
 const N = projets.length;
@@ -116,6 +118,7 @@ export default function Escales() {
     <section
       id="escales"
       data-scene="escales"
+      className="scene-section"
       style={{
         position: "relative",
         height: "100vh",
@@ -167,7 +170,7 @@ export default function Escales() {
         }}
       />
 
-      <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)", width: 1440, height: 900 }}>
+      <div className="stage-desktop stage-scale-center" style={{ position: "absolute", left: "50%", top: "50%", width: 1440, height: 900 }}>
         {/* planète du projet + sphères-escales */}
         <div data-parallax="-0.06" style={{ position: "absolute", right: -110, top: 130, width: 640, height: 640 }}>
           <div style={{ position: "absolute", inset: 0, animation: "floaty 11s ease-in-out infinite" }}>
@@ -334,9 +337,13 @@ export default function Escales() {
             la fenêtre "visuel" soit toujours repoussée sous le texte, même
             quand un titre/description plus long dépasse les minHeight
             (positions absolues indépendantes = chevauchement possible). */}
-        <div style={{ position: "absolute", left: 120, top: 170, display: "flex", flexDirection: "column", gap: 40, maxWidth: 560 }}>
+        <div style={{ position: "absolute", left: 120, top: 64, display: "flex", flexDirection: "column", gap: 28, maxWidth: 560 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-          <div
+          <BlurReveal
+            as="div"
+            text={`escale ${String(idx + 1).padStart(2, "0")} / ${String(N).padStart(2, "0")}`}
+            delay={45}
+            duration={0.8}
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: 15,
@@ -344,10 +351,12 @@ export default function Escales() {
               textTransform: "uppercase",
               color: "#FFB37A",
             }}
-          >
-            {`escale ${String(idx + 1).padStart(2, "0")} / ${String(N).padStart(2, "0")}`}
-          </div>
-          <h2
+          />
+          <BlurReveal
+            as="h2"
+            text={proj.titre}
+            delay={55}
+            duration={0.95}
             style={{
               margin: 0,
               fontFamily: "var(--font-display)",
@@ -355,13 +364,30 @@ export default function Escales() {
               fontWeight: 720,
               lineHeight: 1.05,
               color: "#F6F1FF",
-              minHeight: 128,
+              height: 184,
+              overflow: "hidden",
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical",
             }}
-          >
-            {proj.titre}
-          </h2>
-          <div style={{ fontSize: 20, lineHeight: 1.65, color: "#B9AEDC", minHeight: 100 }}>{proj.desc}</div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          />
+          <BlurReveal
+            as="div"
+            text={proj.desc}
+            delay={22}
+            duration={0.75}
+            style={{
+              fontSize: 20,
+              lineHeight: 1.65,
+              color: "#B9AEDC",
+              height: 165,
+              overflow: "hidden",
+              display: "-webkit-box",
+              WebkitLineClamp: 5,
+              WebkitBoxOrient: "vertical",
+            }}
+          />
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", height: 37, overflow: "hidden" }}>
             {proj.tags.map((tag) => (
               <div
                 key={tag}
@@ -439,83 +465,224 @@ export default function Escales() {
 
         {/* visuel du projet — hublot cliquable vers la galerie */}
         <div
-          onClick={() => {
-            setGalleryIndex(0);
-            setGalleryOpen(true);
-          }}
-          className="escale-porthole"
           style={{
             position: "relative",
             width: 440,
             height: 220,
             flexShrink: 0,
-            borderRadius: 20,
-            border: "1.5px solid rgba(255, 217, 160, 0.4)",
-            boxShadow: "0 0 40px rgba(168, 120, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08)",
-            background: "#141040",
-            overflow: "hidden",
-            cursor: "pointer",
             animation: "floaty 8s ease-in-out infinite",
           }}
         >
-          {proj.cover.type === "image" ? (
-            <Image src={proj.cover.src} alt={proj.cover.alt || proj.titre} fill sizes="440px" style={{ objectFit: "cover" }} />
-          ) : (
-            <Image src={proj.cover.poster} alt={proj.titre} fill sizes="440px" style={{ objectFit: "cover" }} />
-          )}
-          <div
-            className="escale-porthole-overlay"
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              background: "rgba(11, 8, 34, 0.55)",
-              color: "#F6F1FF",
-              fontFamily: "var(--font-mono)",
-              fontSize: 13,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              opacity: 0,
-              transition: "opacity 0.25s ease",
+          <BorderGlow
+            className="escale-porthole"
+            onClick={() => {
+              setGalleryIndex(0);
+              setGalleryOpen(true);
             }}
+            style={{ width: "100%", height: "100%", cursor: "pointer" }}
+            borderRadius={20}
           >
-            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#FFB37A" }} />
-            {proj.gallery.length > 1 ? `voir les ${proj.gallery.length} visuels` : "voir en grand"}
-          </div>
-          {[
-            { left: 10, top: 10 },
-            { right: 10, top: 10 },
-            { left: 10, bottom: 10 },
-            { right: 10, bottom: 10 },
-          ].map((pos, i) => (
-            <div key={i} style={{ position: "absolute", width: 6, height: 6, borderRadius: "50%", background: "rgba(255, 217, 160, 0.7)", ...pos }} />
-          ))}
+            {proj.cover.type === "image" ? (
+              <Image src={proj.cover.src} alt={proj.cover.alt || proj.titre} fill sizes="440px" style={{ objectFit: "cover" }} />
+            ) : (
+              <Image src={proj.cover.poster} alt={proj.titre} fill sizes="440px" style={{ objectFit: "cover" }} />
+            )}
+            <div
+              className="escale-porthole-overlay"
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                background: "rgba(11, 8, 34, 0.55)",
+                color: "#F6F1FF",
+                fontFamily: "var(--font-mono)",
+                fontSize: 13,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                opacity: 0,
+                transition: "opacity 0.25s ease",
+              }}
+            >
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#FFB37A" }} />
+              {proj.gallery.length > 1 ? `voir les ${proj.gallery.length} visuels` : "voir en grand"}
+            </div>
+            {[
+              { left: 10, top: 10 },
+              { right: 10, top: 10 },
+              { left: 10, bottom: 10 },
+              { right: 10, bottom: 10 },
+            ].map((pos, i) => (
+              <div key={i} style={{ position: "absolute", width: 6, height: 6, borderRadius: "50%", background: "rgba(255, 217, 160, 0.7)", ...pos }} />
+            ))}
+          </BorderGlow>
         </div>
         </div>
       </div>
 
-      {galleryOpen && (
-        <EscaleGallery
-          titre={proj.titre}
-          tags={proj.tags}
-          items={proj.gallery}
-          index={galleryIndex}
-          onIndex={setGalleryIndex}
-          onClose={() => setGalleryOpen(false)}
-          onNextEscale={() => {
-            suivant();
-            setGalleryIndex(0);
-          }}
-          onPrevEscale={() => {
-            const prevIdx = (idx - 1 + N) % N;
-            precedent();
-            setGalleryIndex(projets[prevIdx].gallery.length - 1);
-          }}
+      {/* mise en page mobile — l'orbite est abandonnée (calibrée pour un
+          grand canevas), mais toute la navigation reste : compteur, titre,
+          hublot cliquable, flèches, points. */}
+      <div
+        className="stage-mobile"
+        style={{
+          position: "relative",
+          padding: "90px 24px 40px",
+          flexDirection: "column",
+          justifyContent: "center",
+          gap: 24,
+        }}
+      >
+        <BlurReveal
+          as="div"
+          text={`escale ${String(idx + 1).padStart(2, "0")} / ${String(N).padStart(2, "0")}`}
+          delay={45}
+          duration={0.8}
+          style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", color: "#FFB37A" }}
         />
-      )}
+        <BlurReveal
+          as="h2"
+          text={proj.titre}
+          delay={55}
+          duration={0.95}
+          style={{ margin: 0, fontFamily: "var(--font-display)", fontSize: "clamp(28px, 7.5vw, 38px)", fontWeight: 720, lineHeight: 1.08, color: "#F6F1FF" }}
+        />
+
+        <div style={{ position: "relative", width: "100%", height: 200, animation: "floaty 8s ease-in-out infinite" }}>
+          <BorderGlow
+            onClick={() => {
+              setGalleryIndex(0);
+              setGalleryOpen(true);
+            }}
+            style={{ width: "100%", height: "100%", cursor: "pointer" }}
+            borderRadius={18}
+          >
+            {proj.cover.type === "image" ? (
+              <Image src={proj.cover.src} alt={proj.cover.alt || proj.titre} fill sizes="100vw" style={{ objectFit: "cover" }} />
+            ) : (
+              <Image src={proj.cover.poster} alt={proj.titre} fill sizes="100vw" style={{ objectFit: "cover" }} />
+            )}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "flex-end",
+                padding: 12,
+                background: "linear-gradient(0deg, rgba(11, 8, 34, 0.75), transparent 55%)",
+                color: "#F6F1FF",
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                gap: 8,
+              }}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FFB37A", flexShrink: 0, alignSelf: "center" }} />
+              {proj.gallery.length > 1 ? `voir les ${proj.gallery.length} visuels` : "voir en grand"}
+            </div>
+          </BorderGlow>
+        </div>
+
+        <BlurReveal as="div" text={proj.desc} delay={22} duration={0.75} style={{ fontSize: 15, lineHeight: 1.55, color: "#B9AEDC" }} />
+
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {proj.tags.map((tag) => (
+            <div
+              key={tag}
+              style={{
+                border: "1px solid rgba(201, 188, 242, 0.4)",
+                color: "#C9BCF2",
+                borderRadius: 999,
+                padding: "6px 14px",
+                fontSize: 12,
+                letterSpacing: "0.05em",
+              }}
+            >
+              {tag}
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div
+            onClick={precedent}
+            className="escale-arrow"
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: "50%",
+              border: "1.5px solid rgba(255, 179, 122, 0.6)",
+              color: "#FFB37A",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 20,
+              cursor: "pointer",
+              background: "rgba(11, 8, 34, 0.4)",
+              userSelect: "none",
+              flexShrink: 0,
+            }}
+          >
+            ←
+          </div>
+          <div
+            onClick={suivant}
+            className="escale-arrow"
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: "50%",
+              border: "1.5px solid rgba(255, 179, 122, 0.6)",
+              color: "#FFB37A",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 20,
+              cursor: "pointer",
+              background: "rgba(11, 8, 34, 0.4)",
+              userSelect: "none",
+              flexShrink: 0,
+            }}
+          >
+            →
+          </div>
+          <div style={{ display: "flex", gap: 7, marginLeft: 4 }}>
+            {Array.from({ length: 6 }, (_, i) => (
+              <div
+                key={i}
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: idx % 6 === i ? "#FFB37A" : "rgba(201, 188, 242, 0.35)",
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <EscaleGallery
+        open={galleryOpen}
+        titre={proj.titre}
+        tags={proj.tags}
+        items={proj.gallery}
+        index={galleryIndex}
+        onIndex={setGalleryIndex}
+        onClose={() => setGalleryOpen(false)}
+        onNextEscale={() => {
+          suivant();
+          setGalleryIndex(0);
+        }}
+        onPrevEscale={() => {
+          const prevIdx = (idx - 1 + N) % N;
+          precedent();
+          setGalleryIndex(projets[prevIdx].gallery.length - 1);
+        }}
+      />
     </section>
   );
 }

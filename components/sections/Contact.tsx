@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import StarField from "@/components/StarField";
+import BlurReveal from "@/components/BlurReveal";
 import { CONTACT_EMAIL, CONTACT_PHONE, WEB3FORMS_ACCESS_KEY } from "@/lib/data";
 
 const TYPED_FULL = "Posons-nous, parlons-en.";
@@ -64,6 +65,7 @@ export default function Contact() {
     <section
       id="contact"
       data-scene="contact"
+      className="scene-section"
       style={{
         position: "relative",
         height: "100vh",
@@ -77,105 +79,120 @@ export default function Contact() {
         <StarField seed={1357913} />
       </div>
 
-      {/* planète bleue à l'horizon */}
+      {/* planète bleue à l'horizon — data-parallax gère le scroll, l'animation
+          flottante CSS garde le bobbing sur sa propre couche. À l'intérieur,
+          l'anneau (arrière, avant) et le corps ont chacun leur propre
+          vélocité de souris pour un vrai effet de profondeur — l'anneau
+          reste scindé en deux moitiés pour l'illusion "devant/derrière la
+          planète", chaque moitié héritant de la même vélocité "anneau". */}
       <div data-parallax="-0.15" style={{ position: "absolute", right: "8vw", top: 60, width: 250, height: 250 }}>
         <div style={{ position: "absolute", inset: 0, animation: "floaty 12s ease-in-out infinite" }}>
-          <div
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              width: 380,
-              height: 90,
-              border: "2.5px solid rgba(201, 188, 242, 0.4)",
-              borderRadius: "50%",
-              transform: "translate(-50%, -50%) rotate(-14deg)",
-              clipPath: "inset(0 0 50% 0)",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              width: 380,
-              height: 90,
-              border: "2.5px solid rgba(201, 188, 242, 0.4)",
-              borderRadius: "50%",
-              transform: "translate(-50%, -50%) rotate(-14deg)",
-              clipPath: "inset(50% 0 0 0)",
-              zIndex: 1,
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              inset: -7,
-              borderRadius: "50%",
-              border: "5px solid rgba(159, 214, 255, 0.22)",
-              filter: "blur(6px)",
-              pointerEvents: "none",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              borderRadius: "50%",
-              overflow: "hidden",
-              boxShadow: "0 0 90px rgba(110, 146, 232, 0.3)",
-            }}
-          >
+          {/* moitié arrière de l'anneau + halo */}
+          <div data-mouse-parallax="0.032" style={{ position: "absolute", inset: 0 }}>
             <div
               style={{
                 position: "absolute",
-                inset: 0,
-                background: "radial-gradient(circle at 34% 30%, #A8C8FF 0%, #6E92E8 45%, #2A3A8E 100%)",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                left: "-6%",
-                top: "26%",
-                width: 200,
-                height: 22,
-                borderRadius: 999,
-                background: "rgba(255, 255, 255, 0.18)",
-                filter: "blur(1.5px)",
-                animation: "banddrift 14s ease-in-out infinite",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                left: "24%",
-                top: "52%",
-                width: 190,
-                height: 18,
-                borderRadius: 999,
-                background: "rgba(20, 24, 80, 0.28)",
-                filter: "blur(1.5px)",
-                animation: "banddrift 18s ease-in-out 3s infinite reverse",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                left: "60%",
-                top: "16%",
-                width: 22,
-                height: 22,
+                left: "50%",
+                top: "50%",
+                width: 380,
+                height: 90,
+                border: "2.5px solid rgba(201, 188, 242, 0.4)",
                 borderRadius: "50%",
-                background: "rgba(20, 24, 80, 0.22)",
-                boxShadow: "inset 2px 2px 4px rgba(8, 10, 40, 0.5)",
+                transform: "translate(-50%, -50%) rotate(-14deg)",
+                clipPath: "inset(0 0 50% 0)",
               }}
             />
             <div
               style={{
                 position: "absolute",
+                inset: -7,
+                borderRadius: "50%",
+                border: "5px solid rgba(159, 214, 255, 0.22)",
+                filter: "blur(6px)",
+                pointerEvents: "none",
+              }}
+            />
+          </div>
+
+          {/* corps de la planète */}
+          <div data-mouse-parallax="0.014" style={{ position: "absolute", inset: 0 }}>
+            <div
+              style={{
+                position: "absolute",
                 inset: 0,
-                background: "radial-gradient(circle at 34% 30%, transparent 42%, rgba(6, 8, 34, 0.55) 90%)",
+                borderRadius: "50%",
+                overflow: "hidden",
+                boxShadow: "0 0 90px rgba(110, 146, 232, 0.3)",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: "radial-gradient(circle at 34% 30%, #A8C8FF 0%, #6E92E8 45%, #2A3A8E 100%)",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  left: "-6%",
+                  top: "26%",
+                  width: 200,
+                  height: 22,
+                  borderRadius: 999,
+                  background: "rgba(255, 255, 255, 0.18)",
+                  filter: "blur(1.5px)",
+                  animation: "banddrift 14s ease-in-out infinite",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  left: "24%",
+                  top: "52%",
+                  width: 190,
+                  height: 18,
+                  borderRadius: 999,
+                  background: "rgba(20, 24, 80, 0.28)",
+                  filter: "blur(1.5px)",
+                  animation: "banddrift 18s ease-in-out 3s infinite reverse",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  left: "60%",
+                  top: "16%",
+                  width: 22,
+                  height: 22,
+                  borderRadius: "50%",
+                  background: "rgba(20, 24, 80, 0.22)",
+                  boxShadow: "inset 2px 2px 4px rgba(8, 10, 40, 0.5)",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: "radial-gradient(circle at 34% 30%, transparent 42%, rgba(6, 8, 34, 0.55) 90%)",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* moitié avant de l'anneau — passe devant la planète */}
+          <div data-mouse-parallax="0.032" style={{ position: "absolute", inset: 0, zIndex: 1 }}>
+            <div
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: "50%",
+                width: 380,
+                height: 90,
+                border: "2.5px solid rgba(201, 188, 242, 0.4)",
+                borderRadius: "50%",
+                transform: "translate(-50%, -50%) rotate(-14deg)",
+                clipPath: "inset(50% 0 0 0)",
               }}
             />
           </div>
@@ -196,7 +213,7 @@ export default function Contact() {
         }}
       />
 
-      <div style={{ position: "absolute", left: "50%", bottom: 0, transform: "translateX(-50%)", width: 1440, height: 900 }}>
+      <div className="stage-desktop stage-scale-bottom" style={{ position: "absolute", left: "50%", bottom: 0, width: 1440, height: 900 }}>
         {/* cratères */}
         <div style={{ position: "absolute", left: 240, bottom: 120, width: 90, height: 26, borderRadius: "50%", background: "rgba(12, 8, 34, 0.5)" }} />
         <div style={{ position: "absolute", left: 982, bottom: 149, width: 60, height: 18, borderRadius: "50%", background: "rgba(12, 8, 34, 0.45)" }} />
@@ -500,44 +517,245 @@ export default function Contact() {
 
         {/* titre de la scène */}
         <div style={{ position: "absolute", left: 130, top: 96, display: "flex", flexDirection: "column", gap: 12, maxWidth: 560 }}>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: 13, letterSpacing: "0.22em", textTransform: "uppercase", color: "#FFB37A" }}>
-            DERNIÈRE HALTE — REJOINS MOI
-          </div>
-          <h2 style={{ margin: 0, fontFamily: "var(--font-display)", fontSize: 46, fontWeight: 720, lineHeight: 1.05, color: "#F6F1FF" }}>
-            Le voyage se termine autour du feu
-          </h2>
-          <div style={{ fontSize: 17, lineHeight: 1.6, color: "#B9AEDC", maxWidth: 440 }}>
-            La fusée est posée, le feu crépite. C&apos;est le moment de faire connaissance.
-          </div>
+          <BlurReveal
+            as="div"
+            text="DERNIÈRE HALTE — REJOINS MOI"
+            delay={50}
+            duration={0.9}
+            style={{ fontFamily: "var(--font-mono)", fontSize: 13, letterSpacing: "0.22em", textTransform: "uppercase", color: "#FFB37A" }}
+          />
+          <BlurReveal
+            as="h2"
+            text="Le voyage se termine autour du feu"
+            delay={65}
+            duration={1.05}
+            style={{ margin: 0, fontFamily: "var(--font-display)", fontSize: 46, fontWeight: 720, lineHeight: 1.05, color: "#F6F1FF" }}
+          />
+          <BlurReveal
+            as="div"
+            text="La fusée est posée, le feu crépite. C'est le moment de faire connaissance."
+            delay={30}
+            duration={0.9}
+            style={{ fontSize: 17, lineHeight: 1.6, color: "#B9AEDC", maxWidth: 440 }}
+          />
         </div>
 
-        {/* retour au point de départ : boucle */}
-        <a
-          href="#accueil"
-          className="scroll-hint"
+      </div>
+
+      {/* mise en page mobile — la scène illustrée (fusée posée, feu de camp,
+          pilote assis) est abandonnée, mais le titre et le formulaire de
+          contact (l'essentiel) restent intacts. */}
+      <div
+        className="stage-mobile"
+        style={{
+          position: "relative",
+          padding: "90px 24px 130px",
+          flexDirection: "column",
+          justifyContent: "center",
+          gap: 26,
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <BlurReveal
+            as="div"
+            text="DERNIÈRE HALTE — REJOINS MOI"
+            delay={50}
+            duration={0.9}
+            style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", color: "#FFB37A" }}
+          />
+          <BlurReveal
+            as="h2"
+            text="Le voyage se termine autour du feu"
+            delay={65}
+            duration={1.05}
+            style={{ margin: 0, fontFamily: "var(--font-display)", fontSize: "clamp(28px, 7.5vw, 36px)", fontWeight: 720, lineHeight: 1.1, color: "#F6F1FF" }}
+          />
+          <BlurReveal
+            as="div"
+            text="La fusée est posée, le feu crépite. C'est le moment de faire connaissance."
+            delay={30}
+            duration={0.9}
+            style={{ fontSize: 15, lineHeight: 1.55, color: "#B9AEDC" }}
+          />
+        </div>
+
+        {/* console de la fusée : formulaire de contact */}
+        <div
           style={{
-            position: "absolute",
-            left: "50%",
-            bottom: 26,
-            transform: "translateX(-50%)",
+            position: "relative",
+            width: "100%",
+            borderRadius: "18px 18px 12px 12px",
+            background: "linear-gradient(180deg, #3A2F6E 0%, #241A52 60%, #1A1240 100%)",
+            border: "3px solid #6D5FAE",
+            boxShadow: "0 18px 50px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(201, 188, 242, 0.35)",
+            padding: "18px 20px 20px",
             display: "flex",
-            alignItems: "center",
+            flexDirection: "column",
             gap: 12,
-            border: "1px solid rgba(201, 188, 242, 0.35)",
-            borderRadius: 999,
-            padding: "12px 24px",
-            color: "#C9BCF2",
-            fontSize: 15,
-            letterSpacing: "0.08em",
-            background: "rgba(11, 8, 34, 0.45)",
-            textDecoration: "none",
-            zIndex: 45,
           }}
         >
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#FFB37A", animation: "orbitpulse 2.2s ease-out infinite" }} />
-          reprendre le voyage depuis le début
-        </a>
+          <div style={{ position: "absolute", left: 10, top: 10, width: 7, height: 7, borderRadius: "50%", background: "#8F84C4" }} />
+          <div style={{ position: "absolute", right: 10, top: 10, width: 7, height: 7, borderRadius: "50%", background: "#8F84C4" }} />
+          <div style={{ position: "absolute", left: 10, bottom: 10, width: 7, height: 7, borderRadius: "50%", background: "#8F84C4" }} />
+          <div style={{ position: "absolute", right: 10, bottom: 10, width: 7, height: 7, borderRadius: "50%", background: "#8F84C4" }} />
+
+          <div style={{ display: "flex", alignItems: "center", gap: 10, borderBottom: "2px solid rgba(109, 95, 174, 0.4)", paddingBottom: 10 }}>
+            <div style={{ display: "flex", gap: 6 }}>
+              <div style={{ width: 9, height: 9, borderRadius: "50%", background: "#FF8E6E", boxShadow: "0 0 6px rgba(255, 142, 110, 0.8)", animation: "ledpulse 2.2s ease-in-out infinite" }} />
+              <div style={{ width: 9, height: 9, borderRadius: "50%", background: "#FFD9A0", boxShadow: "0 0 6px rgba(255, 217, 160, 0.8)", animation: "ledpulse 1.6s ease-in-out 0.4s infinite" }} />
+              <div style={{ width: 9, height: 9, borderRadius: "50%", background: "#9FE8E4", boxShadow: "0 0 6px rgba(159, 232, 228, 0.8)", animation: "ledpulse 2.8s ease-in-out 0.9s infinite" }} />
+            </div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9BCF2" }}>
+              console — transmission
+            </div>
+          </div>
+
+          <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 720, lineHeight: 1.05, color: "#F6F1FF", minHeight: 26 }}>
+            {typed}
+            <span
+              style={{
+                display: "inline-block",
+                width: 3,
+                height: 18,
+                background: "#FFB37A",
+                marginLeft: 5,
+                verticalAlign: -2,
+                animation: "blinkcursor 1.1s steps(1) infinite",
+              }}
+            />
+          </div>
+
+          {!envoye ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+              <input
+                placeholder="VOTRE NOM"
+                value={nom}
+                onChange={(e) => setNom(e.target.value)}
+                className="contact-input"
+                style={{
+                  border: "2px solid #4A3A8E",
+                  borderRadius: 8,
+                  background: "rgba(8, 6, 24, 0.7)",
+                  color: "#F6F1FF",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 14,
+                  letterSpacing: "0.06em",
+                  padding: "11px 14px",
+                  outline: "none",
+                }}
+              />
+              <input
+                placeholder="VOTRE EMAIL"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="contact-input"
+                style={{
+                  border: "2px solid #4A3A8E",
+                  borderRadius: 8,
+                  background: "rgba(8, 6, 24, 0.7)",
+                  color: "#F6F1FF",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 14,
+                  letterSpacing: "0.06em",
+                  padding: "11px 14px",
+                  outline: "none",
+                }}
+              />
+              <textarea
+                placeholder="VOTRE MESSAGE…"
+                rows={3}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="contact-input"
+                style={{
+                  border: "2px solid #4A3A8E",
+                  borderRadius: 8,
+                  background: "rgba(8, 6, 24, 0.7)",
+                  color: "#F6F1FF",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 14,
+                  letterSpacing: "0.06em",
+                  padding: "11px 14px",
+                  outline: "none",
+                  resize: "none",
+                }}
+              />
+              <div
+                onClick={envoyerSignal}
+                className="contact-submit"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 10,
+                  background: "linear-gradient(120deg, #FFB37A, #FF8E6E)",
+                  color: "#2A1004",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 15,
+                  fontWeight: 700,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  borderRadius: 8,
+                  padding: "13px 20px",
+                  cursor: "pointer",
+                  userSelect: "none",
+                  boxShadow: "0 4px 0 #B5543E",
+                  opacity: envoiEnCours ? 0.6 : 1,
+                }}
+              >
+                {envoiEnCours ? "Transmission…" : "Transmettre →"}
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "14px 0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, color: "#FFD9A0", fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 700, letterSpacing: "0.06em" }}>
+                <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#FFB37A", animation: "orbitpulse 2s ease-out infinite" }} />
+                SIGNAL TRANSMIS
+              </div>
+              <div style={{ fontSize: 14, lineHeight: 1.55, color: "#B9AEDC" }}>
+                Votre message voyage vers la station. Réponse sous 48 h, temps terrestre.
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, borderTop: "2px solid rgba(109, 95, 174, 0.4)", paddingTop: 10 }}>
+            <a href={`mailto:${CONTACT_EMAIL}`} className="contact-link" style={{ color: "#C9BCF2", fontFamily: "var(--font-mono)", fontSize: 12, textDecoration: "none" }}>
+              {CONTACT_EMAIL}
+            </a>
+            <span style={{ color: "rgba(201, 188, 242, 0.4)" }}>•</span>
+            <a href={`tel:${CONTACT_PHONE.replace(/\s+/g, "")}`} className="contact-link" style={{ color: "#C9BCF2", fontFamily: "var(--font-mono)", fontSize: 12, textDecoration: "none" }}>
+              {CONTACT_PHONE}
+            </a>
+          </div>
+        </div>
       </div>
+
+      {/* retour au point de départ : boucle — partagé desktop + mobile */}
+      <a
+        href="#accueil"
+        className="scroll-hint"
+        style={{
+          position: "absolute",
+          left: "50%",
+          bottom: 26,
+          transform: "translateX(-50%)",
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          border: "1px solid rgba(201, 188, 242, 0.35)",
+          borderRadius: 999,
+          padding: "12px 24px",
+          color: "#C9BCF2",
+          fontSize: 15,
+          letterSpacing: "0.08em",
+          background: "rgba(11, 8, 34, 0.45)",
+          textDecoration: "none",
+          zIndex: 45,
+        }}
+      >
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#FFB37A", animation: "orbitpulse 2.2s ease-out infinite" }} />
+        reprendre le voyage depuis le début
+      </a>
     </section>
   );
 }

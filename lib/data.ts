@@ -88,9 +88,26 @@ export const projets = [
     gallery: [
       img("docklight/logo-1.jpg", "Logo"),
       img("docklight/mascotte-1.jpg", "Mascotte"),
+      img("docklight/mascotte-croquis.jpg", "Mascotte — croquis préparatoire"),
       img("docklight/token-1.jpg", "Jeton d'identité"),
       img("docklight/affiche-1.jpg", "Affiche — 1er jet"),
       img("docklight/affiche-2.jpg", "Affiche — 2e jet"),
+      img("docklight/mockup-affiche.jpg", "Mockup — affichage abribus"),
+      img("docklight/mockup-hoodie.jpg", "Mockup — sweat à capuche"),
+      img("docklight/mockup-tshirt.jpg", "Mockup — t-shirt"),
+      img("docklight/mockup-social.jpg", "Mockup — réseaux sociaux"),
+    ],
+  },
+  {
+    titre: "LBSL — conciergerie privée",
+    desc: "Logo pour LB Service Limoges, une conciergerie privée. Plutôt que les codes froids de l'immobilier, le parti pris a été d'incarner le service par une personne : le fondateur, représenté par un visage en line art où moustache et lunettes dessinent les initiales LB.",
+    tags: ["Identité de marque", "Logo", "Illustrator"],
+    bg: "radial-gradient(circle at 32% 28%, #F4E4C8 0%, #C9A876 38%, #6E5438 68%, #241C12 100%)",
+    cover: img("lbsl/logo-1.jpg", "LBSL — logo"),
+    gallery: [
+      img("lbsl/logo-1.jpg", "Logo"),
+      img("lbsl/declinaisons-1.jpg", "Déclinaisons du logo"),
+      img("lbsl/mockup-1.jpg", "Mockup — casquette et sweat"),
     ],
   },
   {
@@ -115,7 +132,8 @@ export const projets = [
     gallery: [
       img("stage-epnak/affichette-1-1.jpg", "Affichette A3"),
       img("stage-epnak/affichette-2-1.jpg", "Affichette A3 — variante"),
-      img("stage-epnak/muret-1.jpg", "Muret"),
+      img("stage-epnak/muret-1.jpg", "Muret — recto"),
+      img("stage-epnak/muret-2.jpg", "Muret — verso"),
     ],
   },
   {
@@ -132,7 +150,12 @@ export const projets = [
     tags: ["Identité de marque", "Packaging", "Branding"],
     bg: "radial-gradient(circle at 32% 28%, #FFDCC0 0%, #F0A878 38%, #B85E4E 68%, #4A2028 100%)",
     cover: img("stack/front.jpg", "Stack — vaisselle"),
-    gallery: [img("stack/front.jpg", "Vue de face"), img("stack/logo-1.jpg", "Logo"), img("stack/detail.jpg", "Détail")],
+    gallery: [
+      img("stack/front.jpg", "Vue de face"),
+      img("stack/logo-1.jpg", "Logo"),
+      img("stack/logo-2.jpg", "Logo — variante"),
+      img("stack/detail.jpg", "Détail"),
+    ],
   },
   {
     titre: "Roomhack — publicité verticale",
@@ -151,6 +174,12 @@ export const projets = [
     gallery: [
       vid("village-des-murmures/teaser.mp4", "village-des-murmures/poster.jpg"),
       img("village-des-murmures/presentation-01.jpg", "Présentation du projet"),
+      img("village-des-murmures/board-31.jpg", "Logo — fond sombre"),
+      img("village-des-murmures/board-32.jpg", "Logo — fond clair"),
+      img("village-des-murmures/board-33.jpg", "Logo — grille de construction"),
+      img("village-des-murmures/board-36.jpg", "Iconographie"),
+      img("village-des-murmures/board-38.jpg", "Affiches"),
+      img("village-des-murmures/board-41.jpg", "Mockup — flyer événement"),
     ],
   },
   {
@@ -162,7 +191,10 @@ export const projets = [
     gallery: [
       img("faire-part/recto.jpg", "Recto"),
       img("faire-part/carte-1.jpg", "Carte"),
-      img("faire-part/presentation-1.jpg", "Présentation"),
+      img("faire-part/carte-2.jpg", "Carte — verso"),
+      img("faire-part/presentation-1.jpg", "Présentation — page 1"),
+      img("faire-part/presentation-2.jpg", "Présentation — page 2"),
+      img("faire-part/presentation-3.jpg", "Présentation — page 3"),
     ],
   },
   {
@@ -188,6 +220,10 @@ export const projets = [
       img("office-notarial/guide-02.jpg", "Palette"),
       img("office-notarial/guide-03.jpg", "Typographie"),
       img("office-notarial/guide-04.jpg", "Applications"),
+      img("office-notarial/guide-05.jpg", "Logo final"),
+      img("office-notarial/guide-06.jpg", "Badge — version monochrome"),
+      img("office-notarial/guide-07.jpg", "Carte de visite — mockup"),
+      img("office-notarial/guide-08.jpg", "Pochette à rabat — mockup"),
     ],
   },
   {
@@ -223,13 +259,20 @@ export const projets = [
     gallery: [img("no-ai-robia/robia-1.jpg", "Robia")],
   },
   {
+    titre: "Souvenir d'une inconnue",
+    desc: "Une rencontre fortuite, une histoire livrée en confidence : le souvenir cher de cette inconnue croisée par hasard m'a inspiré cette illustration vectorielle. Réalisée en exercice personnel pendant une période d'intérim.",
+    tags: ["Illustration", "Vectoriel", "Personnel"],
+    bg: "radial-gradient(circle at 32% 28%, #FFB8D0 0%, #E87EA8 38%, #8A4E7C 68%, #3A1C3E 100%)",
+    cover: img("bataille-de-logos/souvenir-1.jpg", "Souvenir d'une inconnue"),
+    gallery: [img("bataille-de-logos/souvenir-1.jpg", "Souvenir d'une inconnue")],
+  },
+  {
     titre: "Battle de logos",
-    desc: "Une sélection d'entrées réalisées pour les battles de logos organisées par le graphiste et YouTuber Balo — des exercices rapides sur un brief imposé, dont « Souvenir d'une inconnue ».",
+    desc: "Une sélection d'entrées réalisées pour les battles de logos organisées par le graphiste et YouTuber Balo — des exercices rapides sur un brief imposé.",
     tags: ["Logo", "Illustration", "Exercice"],
     bg: "radial-gradient(circle at 32% 28%, #FFD0F0 0%, #E88EDC 38%, #6E9EE8 68%, #F0D878 100%)",
-    cover: img("bataille-de-logos/souvenir-1.jpg", "Battle de logos — souvenir d'une inconnue"),
+    cover: img("bataille-de-logos/olympos.jpg", "Battle de logos — Olympos"),
     gallery: [
-      img("bataille-de-logos/souvenir-1.jpg", "Souvenir d'une inconnue"),
       img("bataille-de-logos/olympos.jpg", "Olympos"),
       img("bataille-de-logos/universe-is-mine.jpg", "Universe is mine"),
       img("bataille-de-logos/bdl-118.jpg", "BDL 118"),

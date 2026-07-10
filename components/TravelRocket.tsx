@@ -5,6 +5,7 @@ export default function TravelRocket() {
   return (
     <div
       id="travel-rocket"
+      className="travel-rocket"
       style={{
         position: "fixed",
         top: "78vh",
