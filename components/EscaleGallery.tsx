@@ -111,7 +111,12 @@ export default function EscaleGallery({
     // null while phase === "closed". So frameWrapRef's element doesn't
     // exist yet the one time a plain mount-effect would run; re-run once
     // it does.
-    phase !== "closed"
+    phase !== "closed",
+    // Touches are heard across the whole panel, not just the image card —
+    // swiping down to close should work from anywhere in the gallery
+    // (title, empty space, the image), matching how a dismissible modal is
+    // actually expected to behave, not just one specific element inside it.
+    panelRef
   );
   useEffect(() => {
     imageDrag.resetAfterCommit();
@@ -205,6 +210,7 @@ export default function EscaleGallery({
         justifyContent: "center",
         background: "radial-gradient(ellipse at 50% 30%, rgba(42, 22, 80, 0.97), rgba(10, 6, 32, 0.99))",
         padding: "40px 24px",
+        overscrollBehaviorY: "none",
         animation: `${closing ? "galleryBackdropOut" : "galleryBackdropIn"} ${closing ? CLOSE_MS : 300}ms ease forwards`,
       }}
     >
@@ -221,6 +227,13 @@ export default function EscaleGallery({
           alignItems: "center",
           width: "100%",
           animation: `${closing ? "galleryPanelOut" : "galleryPanelIn"} ${closing ? CLOSE_MS : 650}ms cubic-bezier(0.22, 1, 0.36, 1) forwards`,
+          // Touches are heard across this whole panel (see useDragSlide's
+          // sourceRef above) — none here so the browser never claims a
+          // vertical drag for its own scroll/refresh gesture before this
+          // component's JS gets a chance to. The thumbnail strip below
+          // opts back into horizontal panning explicitly, since this
+          // would otherwise suppress its native scroll too.
+          touchAction: "none",
         }}
       >
         {/* en-tête */}
@@ -372,6 +385,7 @@ export default function EscaleGallery({
               marginTop: 22,
               maxWidth: 1000,
               overflowX: "auto",
+              touchAction: "pan-x",
               padding: "4px 6px",
               animation: closing ? undefined : "galleryContentIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 320ms both",
             }}

@@ -50,14 +50,21 @@ const FLING = "transform 0.2s ease, opacity 0.2s ease";
 // runs. Pass something that flips once the element actually renders (the
 // modal's open/phase state) so the listeners get attached for real instead
 // of silently binding to nothing forever.
+//
+// `sourceRef` lets touches be heard over a wider area than what visually
+// moves — e.g. a swipe-down-to-close should work from anywhere across a
+// modal (title, image, empty space), not just from touching the one card
+// that happens to pan left/right. Defaults to primaryRef.
 export function useDragSlide(
   primaryRef: React.RefObject<HTMLElement | null>,
   options: DragSlideOptions,
   verticalRef?: React.RefObject<HTMLElement | null>,
-  active: boolean = true
+  active: boolean = true,
+  sourceRef?: React.RefObject<HTMLElement | null>
 ) {
   const { onCommitLeft, onCommitRight, onCommitDown, threshold = 60, verticalThresholdRatio = 0.5 } = options;
   const vRef = verticalRef ?? primaryRef;
+  const srcRef = sourceRef ?? primaryRef;
 
   // Refs so the effect below can close over always-current values without
   // re-subscribing its native listeners on every render.
@@ -86,8 +93,8 @@ export function useDragSlide(
   };
 
   useEffect(() => {
-    const el = primaryRef.current;
-    if (!el || !active) return;
+    const listenEl = srcRef.current;
+    if (!listenEl || !active) return;
 
     const onTouchStart = (e: TouchEvent) => {
       const t = e.touches[0];
@@ -116,9 +123,12 @@ export function useDragSlide(
       if (axis.current === "x") {
         dragged.current = true;
         e.preventDefault();
-        el.style.transition = "none";
-        el.style.transform = `translateX(${dx}px)`;
-        el.style.opacity = String(1 - Math.min(0.4, Math.abs(dx) / 500));
+        const el = primaryRef.current;
+        if (el) {
+          el.style.transition = "none";
+          el.style.transform = `translateX(${dx}px)`;
+          el.style.opacity = String(1 - Math.min(0.4, Math.abs(dx) / 500));
+        }
       } else if (axis.current === "y") {
         dragged.current = true;
         e.preventDefault();
@@ -154,9 +164,12 @@ export function useDragSlide(
         const commitLeft = dx < 0 && onCommitLeft;
         const commitRight = dx > 0 && onCommitRight;
         if (Math.abs(dx) >= threshold && (commitLeft || commitRight)) {
-          el.style.transition = FLING;
-          el.style.transform = `translateX(${dx < 0 ? -90 : 90}px)`;
-          el.style.opacity = "0";
+          const el = primaryRef.current;
+          if (el) {
+            el.style.transition = FLING;
+            el.style.transform = `translateX(${dx < 0 ? -90 : 90}px)`;
+            el.style.opacity = "0";
+          }
           window.setTimeout(() => {
             if (commitLeft) onCommitLeft?.();
             else onCommitRight?.();
@@ -180,15 +193,15 @@ export function useDragSlide(
       }
     };
 
-    el.addEventListener("touchstart", onTouchStart, { passive: true });
-    el.addEventListener("touchmove", onTouchMove, { passive: false });
-    el.addEventListener("touchend", onTouchEnd, { passive: true });
-    el.addEventListener("touchcancel", onTouchEnd, { passive: true });
+    listenEl.addEventListener("touchstart", onTouchStart, { passive: true });
+    listenEl.addEventListener("touchmove", onTouchMove, { passive: false });
+    listenEl.addEventListener("touchend", onTouchEnd, { passive: true });
+    listenEl.addEventListener("touchcancel", onTouchEnd, { passive: true });
     return () => {
-      el.removeEventListener("touchstart", onTouchStart);
-      el.removeEventListener("touchmove", onTouchMove);
-      el.removeEventListener("touchend", onTouchEnd);
-      el.removeEventListener("touchcancel", onTouchEnd);
+      listenEl.removeEventListener("touchstart", onTouchStart);
+      listenEl.removeEventListener("touchmove", onTouchMove);
+      listenEl.removeEventListener("touchend", onTouchEnd);
+      listenEl.removeEventListener("touchcancel", onTouchEnd);
     };
     // primaryRef/verticalRef are refs (stable identity); re-subscribing on
     // every render would be wasteful and isn't needed since optsRef always

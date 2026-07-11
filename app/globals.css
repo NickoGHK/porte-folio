@@ -7,6 +7,13 @@ body {
   margin: 0;
   padding: 0;
   background: #060414;
+  /* Stops a downward drag from triggering the browser's own pull-to-
+     refresh / address-bar-reveal gesture — a browser-chrome-level gesture
+     that touch-action and preventDefault() can't reach because it happens
+     above the page's DOM entirely. Without this, the gallery's swipe-down-
+     to-close could lose the touch to the browser before its own JS ever
+     sees a second touchmove, especially on Chrome. */
+  overscroll-behavior-y: none;
 }
 
 html {
