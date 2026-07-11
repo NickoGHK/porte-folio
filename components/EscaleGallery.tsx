@@ -88,14 +88,18 @@ export default function EscaleGallery({
   // way to move on without reaching for a thumbnail), or swipe up to close
   // — a quick, deliberate flick (verticalThreshold, not a fraction of the
   // screen: dragging half the viewport just to close read as more fiddly
-  // than helpful once the button below was made reachable on its own) —
-  // the panel follows the finger up and closes, or springs back down if
-  // released short of that. The image card live-follows left/right; the
-  // whole panel live-follows the upward drag — the hook locks onto
-  // whichever axis moves first, so an up-swipe can never also register as
-  // a left/right navigation. Same DOM node reused across an index change
-  // (BorderGlow remounts via `key`, but this wrapper doesn't), so
-  // resetAfterCommit() has to run once `index` actually changes.
+  // than helpful once the button below was made reachable on its own).
+  // Both gestures listen on the image card specifically (frameWrapRef),
+  // not the whole panel: touch-action: none there is what lets this code
+  // grab the gesture before the browser's own scroll does, and applying
+  // that across the whole panel blocked native scrolling for the rest of
+  // it (thumbnails, tags) whenever content ran taller than the viewport.
+  // The image card live-follows left/right; the whole panel live-follows
+  // the upward drag even though it's not the touch source — the hook
+  // locks onto whichever axis moves first, so an up-swipe can never also
+  // register as a left/right navigation. Same DOM node reused across an
+  // index change (BorderGlow remounts via `key`, but this wrapper
+  // doesn't), so resetAfterCommit() has to run once `index` changes.
   const imageDrag = useDragSlide(
     frameWrapRef,
     {
@@ -112,12 +116,7 @@ export default function EscaleGallery({
     // null while phase === "closed". So frameWrapRef's element doesn't
     // exist yet the one time a plain mount-effect would run; re-run once
     // it does.
-    phase !== "closed",
-    // Touches are heard across the whole panel, not just the image card —
-    // swiping down to close should work from anywhere in the gallery
-    // (title, empty space, the image), matching how a dismissible modal is
-    // actually expected to behave, not just one specific element inside it.
-    panelRef
+    phase !== "closed"
   );
   useEffect(() => {
     imageDrag.resetAfterCommit();
@@ -229,13 +228,6 @@ export default function EscaleGallery({
           alignItems: "center",
           width: "100%",
           animation: `${closing ? "galleryPanelOut" : "galleryPanelIn"} ${closing ? CLOSE_MS : 650}ms cubic-bezier(0.22, 1, 0.36, 1) forwards`,
-          // Touches are heard across this whole panel (see useDragSlide's
-          // sourceRef above) — none here so the browser never claims a
-          // vertical drag for its own scroll/refresh gesture before this
-          // component's JS gets a chance to. The thumbnail strip below
-          // opts back into horizontal panning explicitly, since this
-          // would otherwise suppress its native scroll too.
-          touchAction: "none",
         }}
       >
         {/* en-tête */}
@@ -406,7 +398,6 @@ export default function EscaleGallery({
               marginTop: 22,
               maxWidth: 1000,
               overflowX: "auto",
-              touchAction: "pan-x",
               padding: "4px 6px",
               animation: closing ? undefined : "galleryContentIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 320ms both",
             }}

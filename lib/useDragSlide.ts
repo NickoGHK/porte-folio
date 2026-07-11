@@ -51,20 +51,20 @@ const FLING = "transform 0.2s ease, opacity 0.2s ease";
 // modal's open/phase state) so the listeners get attached for real instead
 // of silently binding to nothing forever.
 //
-// `sourceRef` lets touches be heard over a wider area than what visually
-// moves — e.g. a swipe-up-to-close should work from anywhere across a
-// modal (title, image, empty space), not just from touching the one card
-// that happens to pan left/right. Defaults to primaryRef.
+// Touches are heard on primaryRef's own element, which needs
+// touch-action: "none" for this to work (see the comment on touchmove's
+// preventDefault below) — don't apply that more broadly than primaryRef
+// itself, e.g. to a whole modal panel, or it blocks native scrolling for
+// everything else inside it whenever content runs taller than the
+// viewport.
 export function useDragSlide(
   primaryRef: React.RefObject<HTMLElement | null>,
   options: DragSlideOptions,
   verticalRef?: React.RefObject<HTMLElement | null>,
-  active: boolean = true,
-  sourceRef?: React.RefObject<HTMLElement | null>
+  active: boolean = true
 ) {
   const { onCommitLeft, onCommitRight, onCommitUp, threshold = 60, verticalThreshold = 90 } = options;
   const vRef = verticalRef ?? primaryRef;
-  const srcRef = sourceRef ?? primaryRef;
 
   // Refs so the effect below can close over always-current values without
   // re-subscribing its native listeners on every render.
@@ -93,7 +93,7 @@ export function useDragSlide(
   };
 
   useEffect(() => {
-    const listenEl = srcRef.current;
+    const listenEl = primaryRef.current;
     if (!listenEl || !active) return;
 
     const onTouchStart = (e: TouchEvent) => {
