@@ -86,6 +86,25 @@ body {
     height: auto !important;
     min-height: 100vh !important;
   }
+  /* Points at the gallery's swipe-up-to-close, which matters most exactly
+     where the close button itself is hardest to reach (Chrome's address
+     bar sitting over it) — desktop has no such problem and no swipe
+     gesture to point at, so this stays hidden there. */
+  .gallery-swipe-hint {
+    display: flex !important;
+  }
+  /* Centering the gallery's content vertically (the desktop default, kept
+     there because there's always room to spare) backfires once content is
+     taller than a phone viewport — a long title wrapping to 2 lines, a
+     full thumbnail row — since it pushes the TOP of the panel, the close
+     button, up above the visible screen instead of just running the
+     bottom past it. flex-start pins that top edge to a fixed, always-
+     reachable offset no matter how tall the content gets; overflow-y lets
+     the rare overflow scroll instead of silently clipping. */
+  .gallery-backdrop {
+    justify-content: flex-start !important;
+    overflow-y: auto !important;
+  }
 }
 
 /* the travel rocket's flight path is computed against the unscaled 1440

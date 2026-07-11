@@ -85,22 +85,23 @@ export default function EscaleGallery({
   // Mobile-only: swipe left/right to browse (images and videos alike — the
   // gallery's own prev/next arrows are hidden on mobile, see
   // .gallery-nav-arrow in globals.css, so on a video slide this is the only
-  // way to move on without reaching for a thumbnail), or drag down to close
-  // (mobile Chrome's address bar can sit right over the close button,
-  // making it unreachable) — the panel follows the finger down and closes
-  // once dragged past half the screen, or springs back up if released
-  // short of that. The image card live-follows left/right; the whole panel
-  // live-follows the downward drag — the hook locks onto whichever axis
-  // moves first, so a down-swipe can never also register as a left/right
-  // navigation. Same DOM node reused across an index change (BorderGlow
-  // remounts via `key`, but this wrapper doesn't), so resetAfterCommit()
-  // has to run once `index` actually changes.
+  // way to move on without reaching for a thumbnail), or swipe up to close
+  // — a quick, deliberate flick (verticalThreshold, not a fraction of the
+  // screen: dragging half the viewport just to close read as more fiddly
+  // than helpful once the button below was made reachable on its own) —
+  // the panel follows the finger up and closes, or springs back down if
+  // released short of that. The image card live-follows left/right; the
+  // whole panel live-follows the upward drag — the hook locks onto
+  // whichever axis moves first, so an up-swipe can never also register as
+  // a left/right navigation. Same DOM node reused across an index change
+  // (BorderGlow remounts via `key`, but this wrapper doesn't), so
+  // resetAfterCommit() has to run once `index` actually changes.
   const imageDrag = useDragSlide(
     frameWrapRef,
     {
       onCommitLeft: goNext,
       onCommitRight: goPrev,
-      onCommitDown: () => {
+      onCommitUp: () => {
         dragClosedRef.current = true;
         onClose();
       },
@@ -200,6 +201,7 @@ export default function EscaleGallery({
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
+      className="gallery-backdrop"
       style={{
         position: "fixed",
         inset: 0,
@@ -236,6 +238,26 @@ export default function EscaleGallery({
           touchAction: "none",
         }}
       >
+        {/* indice de glisser — mobile uniquement : le bouton fermer juste en
+            dessous peut se retrouver sous la barre d'adresse de Chrome, donc
+            en plus de le repousser un peu plus bas (voir cet espace), un
+            deuxième moyen de fermer, plus discret, à la même échelle que les
+            liens "escale précédente/suivante" en bas du panneau. */}
+        <div
+          className="gallery-swipe-hint"
+          style={{
+            display: "none",
+            alignItems: "center",
+            gap: 6,
+            marginBottom: 14,
+            color: "rgba(201, 188, 242, 0.55)",
+            fontSize: 13,
+            letterSpacing: "0.04em",
+          }}
+        >
+          ↑ glisser vers le haut pour fermer
+        </div>
+
         {/* en-tête */}
         <div
           style={{
