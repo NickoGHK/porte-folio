@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 interface DragSlideOptions {
   onCommitLeft?: () => void;
@@ -29,17 +29,40 @@ const FLING = "transform 0.2s ease, opacity 0.2s ease";
 // first moved further in, so it can only ever drive ONE of (left/right) or
 // (down) — never both, and never the wrong one from a diagonal finger.
 //
+// Listeners are attached with native addEventListener rather than React's
+// onTouchStart/onTouchMove props: React registers its synthetic touch
+// listeners as passive, which silently makes preventDefault() a no-op —
+// on real mobile Safari (not reproducible by dispatching synthetic events
+// in a desktop browser, which is what let this slip through testing) that
+// lets the browser's own scroll gesture grab the touch before this code
+// ever sees a second touchmove. touchmove is explicitly { passive: false }
+// so preventDefault actually holds, and the caller should put
+// touch-action: "none" on the element for the same reason at the CSS layer.
+//
 // `verticalRef` lets the vertical gesture drive a different element than
 // the horizontal one (e.g. the whole gallery panel dismisses on swipe-down,
 // while only the image card itself pans on swipe left/right) — defaults to
 // the same ref when omitted.
+//
+// `active` matters whenever primaryRef's element only exists sometimes —
+// e.g. a modal that's always mounted in React but returns null while
+// closed, so its ref is still null the one time this hook's mount effect
+// runs. Pass something that flips once the element actually renders (the
+// modal's open/phase state) so the listeners get attached for real instead
+// of silently binding to nothing forever.
 export function useDragSlide(
   primaryRef: React.RefObject<HTMLElement | null>,
   options: DragSlideOptions,
-  verticalRef?: React.RefObject<HTMLElement | null>
+  verticalRef?: React.RefObject<HTMLElement | null>,
+  active: boolean = true
 ) {
   const { onCommitLeft, onCommitRight, onCommitDown, threshold = 60, verticalThresholdRatio = 0.5 } = options;
   const vRef = verticalRef ?? primaryRef;
+
+  // Refs so the effect below can close over always-current values without
+  // re-subscribing its native listeners on every render.
+  const optsRef = useRef({ onCommitLeft, onCommitRight, onCommitDown, threshold, verticalThresholdRatio });
+  optsRef.current = { onCommitLeft, onCommitRight, onCommitDown, threshold, verticalThresholdRatio };
 
   const startX = useRef<number | null>(null);
   const startY = useRef<number | null>(null);
@@ -62,100 +85,117 @@ export function useDragSlide(
     el.style.opacity = "1";
   };
 
-  const onTouchStart = (e: React.TouchEvent) => {
-    const t = e.touches[0];
-    startX.current = t.clientX;
-    startY.current = t.clientY;
-    axis.current = null;
-    // Reset here, not just in consumeDrag(): a swipe with no tap afterward
-    // (the common case) would otherwise leave this true forever, and the
-    // next unrelated tap's click handler would wrongly read it as a drag.
-    dragged.current = false;
-  };
+  useEffect(() => {
+    const el = primaryRef.current;
+    if (!el || !active) return;
 
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (startX.current === null || startY.current === null) return;
-    const t = e.touches[0];
-    const dx = t.clientX - startX.current;
-    const dy = t.clientY - startY.current;
-    if (axis.current === null && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
-      if (Math.abs(dx) > Math.abs(dy)) axis.current = "x";
-      else if (onCommitDown && dy > 0) axis.current = "y";
-      // An upward-dominant drag, or a downward one with no onCommitDown
-      // handler, stays unlocked — not a gesture we handle, so we leave it
-      // alone rather than eat the touch.
-    }
-    if (axis.current === "x") {
-      dragged.current = true;
-      e.preventDefault();
-      const el = primaryRef.current;
-      if (el) {
+    const onTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      startX.current = t.clientX;
+      startY.current = t.clientY;
+      axis.current = null;
+      // Reset here, not just in consumeDrag(): a swipe with no tap afterward
+      // (the common case) would otherwise leave this true forever, and the
+      // next unrelated tap's click handler would wrongly read it as a drag.
+      dragged.current = false;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (startX.current === null || startY.current === null) return;
+      const { onCommitDown } = optsRef.current;
+      const t = e.touches[0];
+      const dx = t.clientX - startX.current;
+      const dy = t.clientY - startY.current;
+      if (axis.current === null && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
+        if (Math.abs(dx) > Math.abs(dy)) axis.current = "x";
+        else if (onCommitDown && dy > 0) axis.current = "y";
+        // An upward-dominant drag, or a downward one with no onCommitDown
+        // handler, stays unlocked — not a gesture we handle, so we leave it
+        // alone rather than eat the touch.
+      }
+      if (axis.current === "x") {
+        dragged.current = true;
+        e.preventDefault();
         el.style.transition = "none";
         el.style.transform = `translateX(${dx}px)`;
         el.style.opacity = String(1 - Math.min(0.4, Math.abs(dx) / 500));
+      } else if (axis.current === "y") {
+        dragged.current = true;
+        e.preventDefault();
+        const vEl = vRef.current;
+        if (vEl) {
+          // Fades toward ~0.15 opacity as the drag approaches the close
+          // threshold, so the window visibly "runs out" — a clearer signal
+          // of where the release point is than a flat, capped fade would be.
+          const vh = window.innerHeight;
+          const progress = Math.min(1, dy / (vh * optsRef.current.verticalThresholdRatio));
+          vEl.style.transition = "none";
+          vEl.style.transform = `translateY(${dy}px)`;
+          vEl.style.opacity = String(1 - progress * 0.85);
+        }
       }
-    } else if (axis.current === "y") {
-      dragged.current = true;
-      e.preventDefault();
-      const el = vRef.current;
-      if (el) {
-        // Fades toward ~0.15 opacity as the drag approaches the close
-        // threshold, so the window visibly "runs out" — a clearer signal
-        // of where the release point is than a flat, capped fade would be.
-        const vh = window.innerHeight;
-        const progress = Math.min(1, dy / (vh * verticalThresholdRatio));
-        el.style.transition = "none";
-        el.style.transform = `translateY(${dy}px)`;
-        el.style.opacity = String(1 - progress * 0.85);
-      }
-    }
-  };
+    };
 
-  const onTouchEnd = (e: React.TouchEvent) => {
-    if (startX.current === null || startY.current === null) {
+    const onTouchEnd = (e: TouchEvent) => {
+      if (startX.current === null || startY.current === null) {
+        axis.current = null;
+        return;
+      }
+      const { onCommitLeft, onCommitRight, onCommitDown, threshold, verticalThresholdRatio } = optsRef.current;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - startX.current;
+      const dy = t.clientY - startY.current;
+      const lockedAxis = axis.current;
+      startX.current = null;
+      startY.current = null;
       axis.current = null;
-      return;
-    }
-    const t = e.changedTouches[0];
-    const dx = t.clientX - startX.current;
-    const dy = t.clientY - startY.current;
-    const lockedAxis = axis.current;
-    startX.current = null;
-    startY.current = null;
-    axis.current = null;
 
-    if (lockedAxis === "x") {
-      const commitLeft = dx < 0 && onCommitLeft;
-      const commitRight = dx > 0 && onCommitRight;
-      if (Math.abs(dx) >= threshold && (commitLeft || commitRight)) {
-        const el = primaryRef.current;
-        if (el) {
+      if (lockedAxis === "x") {
+        const commitLeft = dx < 0 && onCommitLeft;
+        const commitRight = dx > 0 && onCommitRight;
+        if (Math.abs(dx) >= threshold && (commitLeft || commitRight)) {
           el.style.transition = FLING;
           el.style.transform = `translateX(${dx < 0 ? -90 : 90}px)`;
           el.style.opacity = "0";
+          window.setTimeout(() => {
+            if (commitLeft) onCommitLeft?.();
+            else onCommitRight?.();
+          }, 180);
+        } else {
+          resetX(true);
         }
-        window.setTimeout(() => {
-          if (commitLeft) onCommitLeft?.();
-          else onCommitRight?.();
-        }, 180);
-      } else {
-        resetX(true);
-      }
-    } else if (lockedAxis === "y") {
-      const vh = window.innerHeight;
-      if (dy >= vh * verticalThresholdRatio && onCommitDown) {
-        const el = vRef.current;
-        if (el) {
-          el.style.transition = FLING;
-          el.style.transform = "translateY(100vh)";
-          el.style.opacity = "0";
+      } else if (lockedAxis === "y") {
+        const vh = window.innerHeight;
+        if (dy >= vh * verticalThresholdRatio && onCommitDown) {
+          const vEl = vRef.current;
+          if (vEl) {
+            vEl.style.transition = FLING;
+            vEl.style.transform = "translateY(100vh)";
+            vEl.style.opacity = "0";
+          }
+          window.setTimeout(onCommitDown, 190);
+        } else {
+          resetY(true);
         }
-        window.setTimeout(onCommitDown, 190);
-      } else {
-        resetY(true);
       }
-    }
-  };
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    el.addEventListener("touchcancel", onTouchEnd, { passive: true });
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("touchcancel", onTouchEnd);
+    };
+    // primaryRef/verticalRef are refs (stable identity); re-subscribing on
+    // every render would be wasteful and isn't needed since optsRef always
+    // has the latest callbacks. `active` IS a real dependency: it's what
+    // lets this effect re-run once primaryRef's element actually exists.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
 
   const consumeDrag = () => {
     const was = dragged.current;
@@ -180,5 +220,5 @@ export function useDragSlide(
     el.style.opacity = "1";
   };
 
-  return { onTouchStart, onTouchMove, onTouchEnd, consumeDrag, resetAfterCommit };
+  return { consumeDrag, resetAfterCommit };
 }

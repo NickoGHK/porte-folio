@@ -105,7 +105,13 @@ export default function EscaleGallery({
         onClose();
       },
     },
-    panelRef
+    panelRef,
+    // This component never actually unmounts (its parent always renders
+    // <EscaleGallery open={...} />, only `open` toggles) — it just returns
+    // null while phase === "closed". So frameWrapRef's element doesn't
+    // exist yet the one time a plain mount-effect would run; re-run once
+    // it does.
+    phase !== "closed"
   );
   useEffect(() => {
     imageDrag.resetAfterCommit();
@@ -300,10 +306,7 @@ export default function EscaleGallery({
 
           <div
             ref={frameWrapRef}
-            style={{ flex: 1, height: "min(60vh, 640px)" }}
-            onTouchStart={imageDrag.onTouchStart}
-            onTouchMove={imageDrag.onTouchMove}
-            onTouchEnd={imageDrag.onTouchEnd}
+            style={{ flex: 1, height: "min(60vh, 640px)", touchAction: "none" }}
           >
           <BorderGlow
             key={index}

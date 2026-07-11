@@ -564,13 +564,7 @@ export default function Escales() {
         />
 
         <div style={{ position: "relative", width: "100%", height: 200, animation: "floaty 8s ease-in-out infinite" }}>
-          <div
-            ref={portholeDragRef}
-            style={{ width: "100%", height: "100%" }}
-            onTouchStart={portholeSwipe.onTouchStart}
-            onTouchMove={portholeSwipe.onTouchMove}
-            onTouchEnd={portholeSwipe.onTouchEnd}
-          >
+          <div ref={portholeDragRef} style={{ width: "100%", height: "100%", touchAction: "none" }}>
             <BorderGlow
               onClick={() => {
                 if (portholeSwipe.consumeDrag()) return;
