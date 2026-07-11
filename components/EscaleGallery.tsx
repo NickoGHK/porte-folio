@@ -238,26 +238,6 @@ export default function EscaleGallery({
           touchAction: "none",
         }}
       >
-        {/* indice de glisser — mobile uniquement : le bouton fermer juste en
-            dessous peut se retrouver sous la barre d'adresse de Chrome, donc
-            en plus de le repousser un peu plus bas (voir cet espace), un
-            deuxième moyen de fermer, plus discret, à la même échelle que les
-            liens "escale précédente/suivante" en bas du panneau. */}
-        <div
-          className="gallery-swipe-hint"
-          style={{
-            display: "none",
-            alignItems: "center",
-            gap: 6,
-            marginBottom: 14,
-            color: "rgba(201, 188, 242, 0.55)",
-            fontSize: 13,
-            letterSpacing: "0.04em",
-          }}
-        >
-          ↑ glisser vers le haut pour fermer
-        </div>
-
         {/* en-tête */}
         <div
           style={{
@@ -308,6 +288,25 @@ export default function EscaleGallery({
           >
             ×
           </button>
+        </div>
+
+        {/* indice de glisser — mobile uniquement, juste au-dessus de la
+            fenêtre visuelle elle-même plutôt que tout en haut du panneau :
+            un deuxième moyen de fermer, discret, à la même échelle que les
+            liens "escale précédente/suivante" en bas. */}
+        <div
+          className="gallery-swipe-hint"
+          style={{
+            display: "none",
+            alignItems: "center",
+            gap: 6,
+            marginBottom: 10,
+            color: "rgba(201, 188, 242, 0.55)",
+            fontSize: 13,
+            letterSpacing: "0.04em",
+          }}
+        >
+          ↑ glisser vers le haut pour fermer
         </div>
 
         {/* visionneuse principale */}
