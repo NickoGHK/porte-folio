@@ -100,7 +100,6 @@ export const projets = [
       img("peel-and-stick/mockup-tote.jpg", "Mockup — tote bag"),
       img("peel-and-stick/mockup-tshirt.jpg", "Mockup — t-shirt"),
       img("peel-and-stick/mockup-tshirt-editorial-1.jpg", "Mockup — t-shirt, mise en scène"),
-      img("peel-and-stick/mockup-tshirt-editorial-2.jpg", "Mockup — t-shirt, mise en scène 2"),
       img("peel-and-stick/mockup-hoodie.jpg", "Mockup — sweat à capuche"),
       img("peel-and-stick/mockup-cartes-visite.jpg", "Mockup — cartes de visite"),
       img("peel-and-stick/carte-visite-recto.jpg", "Carte de visite — recto"),
