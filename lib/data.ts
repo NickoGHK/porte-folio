@@ -122,6 +122,7 @@ export const projets = [
       img("stage-epnak/affichette-2-1.jpg", "Affichette A3 — variante"),
       img("stage-epnak/jsh-affichette.jpg", "Affichette — Journée Sport Handicap"),
       img("stage-epnak/jsh-social.jpg", "Journée Sport Handicap — déclinaison réseaux sociaux"),
+      img("stage-epnak/jsh-social-2.jpg", "Journée Sport Handicap — déclinaison réseaux sociaux, variante"),
       img("stage-epnak/salle-plaque-1.jpg", "Numéro de salle — plateau généraliste"),
       img("stage-epnak/salle-plaque-2.jpg", "Numéro de salle — plateau optique"),
       img("stage-epnak/muret-1.jpg", "Plaquette territoriale Muret — recto"),
